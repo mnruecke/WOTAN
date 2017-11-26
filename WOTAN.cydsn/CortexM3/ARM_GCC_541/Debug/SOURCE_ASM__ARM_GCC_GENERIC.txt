@@ -1,0 +1,1 @@
+'D:\VM_share\MCU_PSoC_FPGA\WOTAN\WOTAN.cydsn\Generated_Source\PSoC5\CyBootAsmGnu.s' -o .o -T SOURCE_ASM__ARM_GCC_GENERIC -I 'D:\VM_share\MCU_PSoC_FPGA\WOTAN\WOTAN.cydsn' -I 'D:\VM_share\MCU_PSoC_FPGA\WOTAN\WOTAN.cydsn\Generated_Source\PSoC5' -f 'D:\VM_share\MCU_PSoC_FPGA\WOTAN\WOTAN.cydsn\CortexM3\ARM_GCC_541\Debug\.deps\SOURCE_ASM__ARM_GCC_GENERIC.d'

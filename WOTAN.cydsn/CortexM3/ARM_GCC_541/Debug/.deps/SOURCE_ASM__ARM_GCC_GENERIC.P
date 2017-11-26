@@ -1,0 +1,10 @@
+D:/VM_share/MCU_PSoC_FPGA/WOTAN/WOTAN.cydsn/CortexM3/ARM_GCC_541/Debug/CyBootAsmGnu.o : D:/VM_share/MCU_PSoC_FPGA/WOTAN/WOTAN.cydsn/Generated_Source/PSoC5/CyBootAsmGnu.s D:/VM_share/MCU_PSoC_FPGA/WOTAN/WOTAN.cydsn/Generated_Source/PSoC5/cydevicegnu.inc D:/VM_share/MCU_PSoC_FPGA/WOTAN/WOTAN.cydsn/Generated_Source/PSoC5/cydevicegnu_trm.inc D:/VM_share/MCU_PSoC_FPGA/WOTAN/WOTAN.cydsn/Generated_Source/PSoC5/cyfittergnu.inc 
+
+D:/VM_share/MCU_PSoC_FPGA/WOTAN/WOTAN.cydsn/Generated_Source/PSoC5/CyBootAsmGnu.s : 
+
+D:/VM_share/MCU_PSoC_FPGA/WOTAN/WOTAN.cydsn/Generated_Source/PSoC5/cydevicegnu.inc : 
+
+D:/VM_share/MCU_PSoC_FPGA/WOTAN/WOTAN.cydsn/Generated_Source/PSoC5/cydevicegnu_trm.inc : 
+
+D:/VM_share/MCU_PSoC_FPGA/WOTAN/WOTAN.cydsn/Generated_Source/PSoC5/cyfittergnu.inc : 
+

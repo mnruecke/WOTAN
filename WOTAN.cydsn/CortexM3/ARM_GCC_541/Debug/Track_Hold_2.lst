@@ -1,0 +1,1095 @@
+ARM GAS  C:\Users\User\AppData\Local\Temp\cc1uyjAc.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"Track_Hold_2.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.Track_Hold_2_Enable,"ax",%progbits
+  20              		.align	2
+  21              		.global	Track_Hold_2_Enable
+  22              		.thumb
+  23              		.thumb_func
+  24              		.type	Track_Hold_2_Enable, %function
+  25              	Track_Hold_2_Enable:
+  26              	.LFB1:
+  27              		.file 1 "Generated_Source\\PSoC5\\Track_Hold_2.c"
+   1:Generated_Source\PSoC5/Track_Hold_2.c **** /*******************************************************************************
+   2:Generated_Source\PSoC5/Track_Hold_2.c **** * File Name: Track_Hold_2.c
+   3:Generated_Source\PSoC5/Track_Hold_2.c **** * Version 1.40
+   4:Generated_Source\PSoC5/Track_Hold_2.c **** *
+   5:Generated_Source\PSoC5/Track_Hold_2.c **** * Description:
+   6:Generated_Source\PSoC5/Track_Hold_2.c **** *  This file provides the source code to the API for the SAMPLE/TRACK AND HOLD 
+   7:Generated_Source\PSoC5/Track_Hold_2.c **** *  component.
+   8:Generated_Source\PSoC5/Track_Hold_2.c **** *
+   9:Generated_Source\PSoC5/Track_Hold_2.c **** * Note:
+  10:Generated_Source\PSoC5/Track_Hold_2.c **** *  None
+  11:Generated_Source\PSoC5/Track_Hold_2.c **** *
+  12:Generated_Source\PSoC5/Track_Hold_2.c **** ********************************************************************************
+  13:Generated_Source\PSoC5/Track_Hold_2.c **** * Copyright 2008-2012, Cypress Semiconductor Corporation.  All rights reserved.
+  14:Generated_Source\PSoC5/Track_Hold_2.c **** * You may use this file only in accordance with the license, terms, conditions, 
+  15:Generated_Source\PSoC5/Track_Hold_2.c **** * disclaimers, and limitations in the end user license agreement accompanying 
+  16:Generated_Source\PSoC5/Track_Hold_2.c **** * the software package with which this file was provided.
+  17:Generated_Source\PSoC5/Track_Hold_2.c **** *******************************************************************************/
+  18:Generated_Source\PSoC5/Track_Hold_2.c **** 
+  19:Generated_Source\PSoC5/Track_Hold_2.c **** #include "Track_Hold_2.h"
+  20:Generated_Source\PSoC5/Track_Hold_2.c **** 
+  21:Generated_Source\PSoC5/Track_Hold_2.c **** #if (!CY_PSOC5A)
+  22:Generated_Source\PSoC5/Track_Hold_2.c ****     #if (CYDEV_VARIABLE_VDDA == 1u)
+  23:Generated_Source\PSoC5/Track_Hold_2.c ****         #include "CyScBoostClk.h"
+  24:Generated_Source\PSoC5/Track_Hold_2.c ****     #endif /* (CYDEV_VARIABLE_VDDA == 1u) */
+  25:Generated_Source\PSoC5/Track_Hold_2.c **** #endif /* (!CY_PSOC5A) */
+  26:Generated_Source\PSoC5/Track_Hold_2.c **** 
+  27:Generated_Source\PSoC5/Track_Hold_2.c **** uint8 Track_Hold_2_initVar = 0u;
+  28:Generated_Source\PSoC5/Track_Hold_2.c **** 
+  29:Generated_Source\PSoC5/Track_Hold_2.c **** /* static Track_Hold_2_backupStruct  Track_Hold_2_backup; */
+  30:Generated_Source\PSoC5/Track_Hold_2.c **** #if (CY_PSOC5A)
+ARM GAS  C:\Users\User\AppData\Local\Temp\cc1uyjAc.s 			page 2
+
+
+  31:Generated_Source\PSoC5/Track_Hold_2.c ****     static Track_Hold_2_backupStruct  Track_Hold_2_P5backup;
+  32:Generated_Source\PSoC5/Track_Hold_2.c **** #endif /* CY_PSOC5A */
+  33:Generated_Source\PSoC5/Track_Hold_2.c **** 
+  34:Generated_Source\PSoC5/Track_Hold_2.c **** 
+  35:Generated_Source\PSoC5/Track_Hold_2.c **** 
+  36:Generated_Source\PSoC5/Track_Hold_2.c **** /*******************************************************************************   
+  37:Generated_Source\PSoC5/Track_Hold_2.c **** * Function Name: Track_Hold_2_Init
+  38:Generated_Source\PSoC5/Track_Hold_2.c **** ********************************************************************************
+  39:Generated_Source\PSoC5/Track_Hold_2.c **** *
+  40:Generated_Source\PSoC5/Track_Hold_2.c **** * Summary:
+  41:Generated_Source\PSoC5/Track_Hold_2.c **** *  Initialize component's parameters to the parameters set by user in the 
+  42:Generated_Source\PSoC5/Track_Hold_2.c **** *  customizer of the component placed onto schematic. Usually called in 
+  43:Generated_Source\PSoC5/Track_Hold_2.c **** *  Track_Hold_2_Start().
+  44:Generated_Source\PSoC5/Track_Hold_2.c **** *
+  45:Generated_Source\PSoC5/Track_Hold_2.c **** * Parameters:
+  46:Generated_Source\PSoC5/Track_Hold_2.c **** *  void
+  47:Generated_Source\PSoC5/Track_Hold_2.c **** *
+  48:Generated_Source\PSoC5/Track_Hold_2.c **** * Return:
+  49:Generated_Source\PSoC5/Track_Hold_2.c **** *  void
+  50:Generated_Source\PSoC5/Track_Hold_2.c **** *
+  51:Generated_Source\PSoC5/Track_Hold_2.c **** *******************************************************************************/
+  52:Generated_Source\PSoC5/Track_Hold_2.c **** void Track_Hold_2_Init(void) 
+  53:Generated_Source\PSoC5/Track_Hold_2.c **** {   
+  54:Generated_Source\PSoC5/Track_Hold_2.c ****     /* Configure SC Block based on selected Sample/Track type */
+  55:Generated_Source\PSoC5/Track_Hold_2.c ****     #if (Track_Hold_2_SAMPLE_TRACK_MODE == Track_Hold_2_SAMPLEANDHOLD) /* Sample and hold mode */
+  56:Generated_Source\PSoC5/Track_Hold_2.c ****         /* SC Block mode -  - SCxx_CR0[3:1] */
+  57:Generated_Source\PSoC5/Track_Hold_2.c ****         Track_Hold_2_CR0_REG = Track_Hold_2_MODE_SAMPLEANDHOLD;
+  58:Generated_Source\PSoC5/Track_Hold_2.c ****         
+  59:Generated_Source\PSoC5/Track_Hold_2.c ****         /* SC Block CR1 */ 
+  60:Generated_Source\PSoC5/Track_Hold_2.c ****         Track_Hold_2_CR1_REG = (Track_Hold_2_COMP_4P35PF  |
+  61:Generated_Source\PSoC5/Track_Hold_2.c ****                                 Track_Hold_2_GAIN_0DB);
+  62:Generated_Source\PSoC5/Track_Hold_2.c ****         #if(Track_Hold_2_SAMPLE_CLOCK_EDGE == Track_Hold_2_EDGE_POSITIVENEGATIVE)
+  63:Generated_Source\PSoC5/Track_Hold_2.c ****             Track_Hold_2_CR1_REG =  Track_Hold_2_CR1_REG  | Track_Hold_2_DIV2_DISABLE ;
+  64:Generated_Source\PSoC5/Track_Hold_2.c ****         #else
+  65:Generated_Source\PSoC5/Track_Hold_2.c ****             Track_Hold_2_CR1_REG =  Track_Hold_2_CR1_REG  | Track_Hold_2_DIV2_ENABLE ;
+  66:Generated_Source\PSoC5/Track_Hold_2.c ****         #endif
+  67:Generated_Source\PSoC5/Track_Hold_2.c ****          
+  68:Generated_Source\PSoC5/Track_Hold_2.c ****         #if(Track_Hold_2_VREF_TYPE == Track_Hold_2_EXTERNAL)
+  69:Generated_Source\PSoC5/Track_Hold_2.c ****             Track_Hold_2_CR2_REG = Track_Hold_2_BIAS_LOW |
+  70:Generated_Source\PSoC5/Track_Hold_2.c ****                                        Track_Hold_2_REDC_00 | 
+  71:Generated_Source\PSoC5/Track_Hold_2.c ****                                        Track_Hold_2_GNDVREF_DI;
+  72:Generated_Source\PSoC5/Track_Hold_2.c ****         #else
+  73:Generated_Source\PSoC5/Track_Hold_2.c ****             Track_Hold_2_CR2_REG = Track_Hold_2_BIAS_LOW |
+  74:Generated_Source\PSoC5/Track_Hold_2.c ****                                        Track_Hold_2_REDC_00 | 
+  75:Generated_Source\PSoC5/Track_Hold_2.c ****                                        Track_Hold_2_GNDVREF_E;
+  76:Generated_Source\PSoC5/Track_Hold_2.c ****         #endif
+  77:Generated_Source\PSoC5/Track_Hold_2.c ****     #else
+  78:Generated_Source\PSoC5/Track_Hold_2.c ****         /* Track and Hold Mode */
+  79:Generated_Source\PSoC5/Track_Hold_2.c ****         /* SC Block mode -  - SCxx_CR0[3:1] */
+  80:Generated_Source\PSoC5/Track_Hold_2.c ****         Track_Hold_2_CR0_REG = Track_Hold_2_MODE_TRACKANDHOLD; 
+  81:Generated_Source\PSoC5/Track_Hold_2.c ****         
+  82:Generated_Source\PSoC5/Track_Hold_2.c ****         /* SC Block CR1 */ 
+  83:Generated_Source\PSoC5/Track_Hold_2.c ****         Track_Hold_2_CR1_REG = Track_Hold_2_COMP_4P35PF  |
+  84:Generated_Source\PSoC5/Track_Hold_2.c ****                                    Track_Hold_2_DIV2_ENABLE |
+  85:Generated_Source\PSoC5/Track_Hold_2.c ****                                    Track_Hold_2_GAIN_0DB;
+  86:Generated_Source\PSoC5/Track_Hold_2.c ****                                 
+  87:Generated_Source\PSoC5/Track_Hold_2.c ****         /* SC Block CR2 */
+ARM GAS  C:\Users\User\AppData\Local\Temp\cc1uyjAc.s 			page 3
+
+
+  88:Generated_Source\PSoC5/Track_Hold_2.c ****         Track_Hold_2_CR2_REG = Track_Hold_2_BIAS_LOW |
+  89:Generated_Source\PSoC5/Track_Hold_2.c ****                                    Track_Hold_2_REDC_00 |
+  90:Generated_Source\PSoC5/Track_Hold_2.c ****                                    Track_Hold_2_GNDVREF_E;
+  91:Generated_Source\PSoC5/Track_Hold_2.c ****     #endif /* end if - Sample/Track Type */
+  92:Generated_Source\PSoC5/Track_Hold_2.c ****     
+  93:Generated_Source\PSoC5/Track_Hold_2.c ****     /* Enable SC Block clocking */
+  94:Generated_Source\PSoC5/Track_Hold_2.c ****     Track_Hold_2_CLK_REG |= Track_Hold_2_CLK_EN;
+  95:Generated_Source\PSoC5/Track_Hold_2.c ****     
+  96:Generated_Source\PSoC5/Track_Hold_2.c ****     /* Set default power */
+  97:Generated_Source\PSoC5/Track_Hold_2.c ****     Track_Hold_2_SetPower(Track_Hold_2_INIT_POWER);
+  98:Generated_Source\PSoC5/Track_Hold_2.c **** }
+  99:Generated_Source\PSoC5/Track_Hold_2.c **** 
+ 100:Generated_Source\PSoC5/Track_Hold_2.c **** 
+ 101:Generated_Source\PSoC5/Track_Hold_2.c **** /*******************************************************************************   
+ 102:Generated_Source\PSoC5/Track_Hold_2.c **** * Function Name: Track_Hold_2_Enable
+ 103:Generated_Source\PSoC5/Track_Hold_2.c **** ********************************************************************************
+ 104:Generated_Source\PSoC5/Track_Hold_2.c **** *
+ 105:Generated_Source\PSoC5/Track_Hold_2.c **** * Summary:
+ 106:Generated_Source\PSoC5/Track_Hold_2.c **** *  Enables the Sample/Track and Hold block operation
+ 107:Generated_Source\PSoC5/Track_Hold_2.c **** *
+ 108:Generated_Source\PSoC5/Track_Hold_2.c **** * Parameters:
+ 109:Generated_Source\PSoC5/Track_Hold_2.c **** *  void
+ 110:Generated_Source\PSoC5/Track_Hold_2.c **** *
+ 111:Generated_Source\PSoC5/Track_Hold_2.c **** * Return:
+ 112:Generated_Source\PSoC5/Track_Hold_2.c **** *  void
+ 113:Generated_Source\PSoC5/Track_Hold_2.c **** *
+ 114:Generated_Source\PSoC5/Track_Hold_2.c **** *******************************************************************************/
+ 115:Generated_Source\PSoC5/Track_Hold_2.c **** void Track_Hold_2_Enable(void) 
+ 116:Generated_Source\PSoC5/Track_Hold_2.c **** {
+  28              		.loc 1 116 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              		@ link register save eliminated.
+ 117:Generated_Source\PSoC5/Track_Hold_2.c ****     /* This is to restore the value of register CR1 and CR2 which is saved 
+ 118:Generated_Source\PSoC5/Track_Hold_2.c ****       in prior to the modifications in stop() API */
+ 119:Generated_Source\PSoC5/Track_Hold_2.c ****     #if (CY_PSOC5A)
+ 120:Generated_Source\PSoC5/Track_Hold_2.c ****         if(Track_Hold_2_P5backup.enableState == 1u)
+ 121:Generated_Source\PSoC5/Track_Hold_2.c ****         {
+ 122:Generated_Source\PSoC5/Track_Hold_2.c ****             Track_Hold_2_CR1_REG = Track_Hold_2_P5backup.scCR1Reg;
+ 123:Generated_Source\PSoC5/Track_Hold_2.c ****             Track_Hold_2_CR2_REG = Track_Hold_2_P5backup.scCR2Reg;
+ 124:Generated_Source\PSoC5/Track_Hold_2.c ****             Track_Hold_2_P5backup.enableState = 0u;
+ 125:Generated_Source\PSoC5/Track_Hold_2.c ****         }
+ 126:Generated_Source\PSoC5/Track_Hold_2.c ****     #endif /* CY_PSOC5A */
+ 127:Generated_Source\PSoC5/Track_Hold_2.c ****     
+ 128:Generated_Source\PSoC5/Track_Hold_2.c ****     /* Enable power to SC block in active mode */
+ 129:Generated_Source\PSoC5/Track_Hold_2.c ****     Track_Hold_2_PM_ACT_CFG_REG |= Track_Hold_2_ACT_PWR_EN;
+  33              		.loc 1 129 0
+  34 0000 084A     		ldr	r2, .L2
+  35 0002 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+  36 0004 43F00203 		orr	r3, r3, #2
+  37 0008 1370     		strb	r3, [r2]
+ 130:Generated_Source\PSoC5/Track_Hold_2.c ****     
+ 131:Generated_Source\PSoC5/Track_Hold_2.c ****     /* Enable power to SC block in Alternative active mode */
+ 132:Generated_Source\PSoC5/Track_Hold_2.c ****     Track_Hold_2_PM_STBY_CFG_REG |= Track_Hold_2_STBY_PWR_EN;
+  38              		.loc 1 132 0
+  39 000a 1032     		adds	r2, r2, #16
+ARM GAS  C:\Users\User\AppData\Local\Temp\cc1uyjAc.s 			page 4
+
+
+  40 000c 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+  41 000e 43F00203 		orr	r3, r3, #2
+  42 0012 1370     		strb	r3, [r2]
+ 133:Generated_Source\PSoC5/Track_Hold_2.c **** 
+ 134:Generated_Source\PSoC5/Track_Hold_2.c ****     Track_Hold_2_PUMP_CR1_REG |= Track_Hold_2_PUMP_CR1_SC_CLKSEL;
+  43              		.loc 1 134 0
+  44 0014 02F5A552 		add	r2, r2, #5280
+  45 0018 1E32     		adds	r2, r2, #30
+  46 001a 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+  47 001c 43F08003 		orr	r3, r3, #128
+  48 0020 1370     		strb	r3, [r2]
+  49 0022 7047     		bx	lr
+  50              	.L3:
+  51              		.align	2
+  52              	.L2:
+  53 0024 A9430040 		.word	1073759145
+  54              		.cfi_endproc
+  55              	.LFE1:
+  56              		.size	Track_Hold_2_Enable, .-Track_Hold_2_Enable
+  57              		.section	.text.Track_Hold_2_Stop,"ax",%progbits
+  58              		.align	2
+  59              		.global	Track_Hold_2_Stop
+  60              		.thumb
+  61              		.thumb_func
+  62              		.type	Track_Hold_2_Stop, %function
+  63              	Track_Hold_2_Stop:
+  64              	.LFB3:
+ 135:Generated_Source\PSoC5/Track_Hold_2.c ****     
+ 136:Generated_Source\PSoC5/Track_Hold_2.c ****     #if (!CY_PSOC5A)
+ 137:Generated_Source\PSoC5/Track_Hold_2.c ****         #if (CYDEV_VARIABLE_VDDA == 1u)
+ 138:Generated_Source\PSoC5/Track_Hold_2.c ****             if(CyScPumpEnabled == 1u)
+ 139:Generated_Source\PSoC5/Track_Hold_2.c ****             {
+ 140:Generated_Source\PSoC5/Track_Hold_2.c ****                 Track_Hold_2_BSTCLK_REG &= (uint8)(~Track_Hold_2_BST_CLK_INDEX_MASK);
+ 141:Generated_Source\PSoC5/Track_Hold_2.c ****                 Track_Hold_2_BSTCLK_REG |= Track_Hold_2_BST_CLK_EN | CyScBoostClk__INDEX;
+ 142:Generated_Source\PSoC5/Track_Hold_2.c ****                 Track_Hold_2_SC_MISC_REG |= Track_Hold_2_PUMP_FORCE;
+ 143:Generated_Source\PSoC5/Track_Hold_2.c ****                 CyScBoostClk_Start();
+ 144:Generated_Source\PSoC5/Track_Hold_2.c ****             }
+ 145:Generated_Source\PSoC5/Track_Hold_2.c ****             else
+ 146:Generated_Source\PSoC5/Track_Hold_2.c ****             {
+ 147:Generated_Source\PSoC5/Track_Hold_2.c ****                 Track_Hold_2_BSTCLK_REG &= (uint8)(~Track_Hold_2_BST_CLK_EN);
+ 148:Generated_Source\PSoC5/Track_Hold_2.c ****                 Track_Hold_2_SC_MISC_REG &= (uint8)(~Track_Hold_2_PUMP_FORCE);
+ 149:Generated_Source\PSoC5/Track_Hold_2.c ****             }
+ 150:Generated_Source\PSoC5/Track_Hold_2.c ****         #endif /* (CYDEV_VARIABLE_VDDA == 1u) */
+ 151:Generated_Source\PSoC5/Track_Hold_2.c ****     #endif /* (!CY_PSOC5A) */
+ 152:Generated_Source\PSoC5/Track_Hold_2.c **** }
+ 153:Generated_Source\PSoC5/Track_Hold_2.c **** 
+ 154:Generated_Source\PSoC5/Track_Hold_2.c **** 
+ 155:Generated_Source\PSoC5/Track_Hold_2.c **** /*******************************************************************************
+ 156:Generated_Source\PSoC5/Track_Hold_2.c **** * Function Name: Track_Hold_2_Start
+ 157:Generated_Source\PSoC5/Track_Hold_2.c **** ********************************************************************************
+ 158:Generated_Source\PSoC5/Track_Hold_2.c **** *
+ 159:Generated_Source\PSoC5/Track_Hold_2.c **** * Summary:
+ 160:Generated_Source\PSoC5/Track_Hold_2.c **** *  The start function initializes the Sample and Hold with the default values, 
+ 161:Generated_Source\PSoC5/Track_Hold_2.c **** *  and sets the power to the given level.  A power level of 0, is the same as 
+ 162:Generated_Source\PSoC5/Track_Hold_2.c **** *  executing the stop function.
+ 163:Generated_Source\PSoC5/Track_Hold_2.c **** *
+ 164:Generated_Source\PSoC5/Track_Hold_2.c **** * Parameters:
+ARM GAS  C:\Users\User\AppData\Local\Temp\cc1uyjAc.s 			page 5
+
+
+ 165:Generated_Source\PSoC5/Track_Hold_2.c **** *  void
+ 166:Generated_Source\PSoC5/Track_Hold_2.c **** *
+ 167:Generated_Source\PSoC5/Track_Hold_2.c **** * Return:
+ 168:Generated_Source\PSoC5/Track_Hold_2.c **** *  void
+ 169:Generated_Source\PSoC5/Track_Hold_2.c **** *
+ 170:Generated_Source\PSoC5/Track_Hold_2.c **** *******************************************************************************/
+ 171:Generated_Source\PSoC5/Track_Hold_2.c **** void Track_Hold_2_Start(void) 
+ 172:Generated_Source\PSoC5/Track_Hold_2.c **** {
+ 173:Generated_Source\PSoC5/Track_Hold_2.c ****     /* If not Initialized then initialize all required hardware and software */
+ 174:Generated_Source\PSoC5/Track_Hold_2.c ****     if(Track_Hold_2_initVar == 0u)
+ 175:Generated_Source\PSoC5/Track_Hold_2.c ****     {
+ 176:Generated_Source\PSoC5/Track_Hold_2.c ****         Track_Hold_2_Init();
+ 177:Generated_Source\PSoC5/Track_Hold_2.c ****         Track_Hold_2_initVar = 1u;
+ 178:Generated_Source\PSoC5/Track_Hold_2.c ****     }
+ 179:Generated_Source\PSoC5/Track_Hold_2.c ****     Track_Hold_2_Enable();
+ 180:Generated_Source\PSoC5/Track_Hold_2.c **** }
+ 181:Generated_Source\PSoC5/Track_Hold_2.c **** 
+ 182:Generated_Source\PSoC5/Track_Hold_2.c **** 
+ 183:Generated_Source\PSoC5/Track_Hold_2.c **** /*******************************************************************************
+ 184:Generated_Source\PSoC5/Track_Hold_2.c **** * Function Name: Track_Hold_2_Stop
+ 185:Generated_Source\PSoC5/Track_Hold_2.c **** ********************************************************************************
+ 186:Generated_Source\PSoC5/Track_Hold_2.c **** *
+ 187:Generated_Source\PSoC5/Track_Hold_2.c **** * Summary:
+ 188:Generated_Source\PSoC5/Track_Hold_2.c **** *  Powers down amplifier to lowest power state.
+ 189:Generated_Source\PSoC5/Track_Hold_2.c **** *
+ 190:Generated_Source\PSoC5/Track_Hold_2.c **** * Parameters:
+ 191:Generated_Source\PSoC5/Track_Hold_2.c **** *  void
+ 192:Generated_Source\PSoC5/Track_Hold_2.c **** *
+ 193:Generated_Source\PSoC5/Track_Hold_2.c **** * Return:
+ 194:Generated_Source\PSoC5/Track_Hold_2.c **** *  void
+ 195:Generated_Source\PSoC5/Track_Hold_2.c **** *
+ 196:Generated_Source\PSoC5/Track_Hold_2.c **** *******************************************************************************/
+ 197:Generated_Source\PSoC5/Track_Hold_2.c **** void Track_Hold_2_Stop(void) 
+ 198:Generated_Source\PSoC5/Track_Hold_2.c **** {   
+  65              		.loc 1 198 0
+  66              		.cfi_startproc
+  67              		@ args = 0, pretend = 0, frame = 0
+  68              		@ frame_needed = 0, uses_anonymous_args = 0
+  69              		@ link register save eliminated.
+ 199:Generated_Source\PSoC5/Track_Hold_2.c ****     /* Disble power to the Amp in Active mode template */
+ 200:Generated_Source\PSoC5/Track_Hold_2.c ****     Track_Hold_2_PM_ACT_CFG_REG &= (uint8)(~Track_Hold_2_ACT_PWR_EN);
+  70              		.loc 1 200 0
+  71 0000 054A     		ldr	r2, .L5
+  72 0002 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+  73 0004 03F0FD03 		and	r3, r3, #253
+  74 0008 1370     		strb	r3, [r2]
+ 201:Generated_Source\PSoC5/Track_Hold_2.c **** 
+ 202:Generated_Source\PSoC5/Track_Hold_2.c ****     /* Disble power to the Amp in Alternative Active mode template */
+ 203:Generated_Source\PSoC5/Track_Hold_2.c ****     Track_Hold_2_PM_STBY_CFG_REG &= (uint8)(~Track_Hold_2_STBY_PWR_EN);
+  75              		.loc 1 203 0
+  76 000a 1032     		adds	r2, r2, #16
+  77 000c 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+  78 000e 03F0FD03 		and	r3, r3, #253
+  79 0012 1370     		strb	r3, [r2]
+  80 0014 7047     		bx	lr
+  81              	.L6:
+  82 0016 00BF     		.align	2
+ARM GAS  C:\Users\User\AppData\Local\Temp\cc1uyjAc.s 			page 6
+
+
+  83              	.L5:
+  84 0018 A9430040 		.word	1073759145
+  85              		.cfi_endproc
+  86              	.LFE3:
+  87              		.size	Track_Hold_2_Stop, .-Track_Hold_2_Stop
+  88              		.section	.text.Track_Hold_2_SetPower,"ax",%progbits
+  89              		.align	2
+  90              		.global	Track_Hold_2_SetPower
+  91              		.thumb
+  92              		.thumb_func
+  93              		.type	Track_Hold_2_SetPower, %function
+  94              	Track_Hold_2_SetPower:
+  95              	.LFB4:
+ 204:Generated_Source\PSoC5/Track_Hold_2.c ****     
+ 205:Generated_Source\PSoC5/Track_Hold_2.c ****     #if (!CY_PSOC5A)
+ 206:Generated_Source\PSoC5/Track_Hold_2.c ****         #if (CYDEV_VARIABLE_VDDA == 1u)
+ 207:Generated_Source\PSoC5/Track_Hold_2.c ****             Track_Hold_2_BSTCLK_REG &= (uint8)(~Track_Hold_2_BST_CLK_EN);
+ 208:Generated_Source\PSoC5/Track_Hold_2.c ****             /* Disable pumps only if there aren't any SC block in use */
+ 209:Generated_Source\PSoC5/Track_Hold_2.c ****             if ((Track_Hold_2_PM_ACT_CFG_REG & Track_Hold_2_PM_ACT_CFG_MASK) == 0u)
+ 210:Generated_Source\PSoC5/Track_Hold_2.c ****             {
+ 211:Generated_Source\PSoC5/Track_Hold_2.c ****                 Track_Hold_2_SC_MISC_REG &= (uint8)(~Track_Hold_2_PUMP_FORCE);
+ 212:Generated_Source\PSoC5/Track_Hold_2.c ****                 Track_Hold_2_PUMP_CR1_REG &= (uint8)(~Track_Hold_2_PUMP_CR1_SC_CLKSEL);
+ 213:Generated_Source\PSoC5/Track_Hold_2.c ****                 CyScBoostClk_Stop();
+ 214:Generated_Source\PSoC5/Track_Hold_2.c ****             }
+ 215:Generated_Source\PSoC5/Track_Hold_2.c ****         #endif /* CYDEV_VARIABLE_VDDA == 1u */
+ 216:Generated_Source\PSoC5/Track_Hold_2.c ****     #endif /* (CY_PSOC3 || CY_PSOC5LP) */
+ 217:Generated_Source\PSoC5/Track_Hold_2.c ****  
+ 218:Generated_Source\PSoC5/Track_Hold_2.c ****     /* This sets Sample and hold in zero current mode and output routes are valid */
+ 219:Generated_Source\PSoC5/Track_Hold_2.c ****     #if (CY_PSOC5A)
+ 220:Generated_Source\PSoC5/Track_Hold_2.c ****         Track_Hold_2_P5backup.scCR1Reg = Track_Hold_2_CR1_REG;
+ 221:Generated_Source\PSoC5/Track_Hold_2.c ****         Track_Hold_2_P5backup.scCR2Reg = Track_Hold_2_CR2_REG;
+ 222:Generated_Source\PSoC5/Track_Hold_2.c ****         Track_Hold_2_CR1_REG = 0x00u;
+ 223:Generated_Source\PSoC5/Track_Hold_2.c ****         Track_Hold_2_CR2_REG = 0x00u;
+ 224:Generated_Source\PSoC5/Track_Hold_2.c ****         Track_Hold_2_P5backup.enableState = 1u;
+ 225:Generated_Source\PSoC5/Track_Hold_2.c ****     #endif /* CY_PSOC5A */
+ 226:Generated_Source\PSoC5/Track_Hold_2.c **** }
+ 227:Generated_Source\PSoC5/Track_Hold_2.c **** 
+ 228:Generated_Source\PSoC5/Track_Hold_2.c **** 
+ 229:Generated_Source\PSoC5/Track_Hold_2.c **** /*******************************************************************************
+ 230:Generated_Source\PSoC5/Track_Hold_2.c **** * Function Name: Track_Hold_2_SetPower
+ 231:Generated_Source\PSoC5/Track_Hold_2.c **** ********************************************************************************
+ 232:Generated_Source\PSoC5/Track_Hold_2.c **** *
+ 233:Generated_Source\PSoC5/Track_Hold_2.c **** * Summary:
+ 234:Generated_Source\PSoC5/Track_Hold_2.c **** *  Set the power of the Sample/Track and Hold.
+ 235:Generated_Source\PSoC5/Track_Hold_2.c **** *
+ 236:Generated_Source\PSoC5/Track_Hold_2.c **** * Parameters:
+ 237:Generated_Source\PSoC5/Track_Hold_2.c **** *  power: Sets power level between (0) and (3) high power
+ 238:Generated_Source\PSoC5/Track_Hold_2.c **** *
+ 239:Generated_Source\PSoC5/Track_Hold_2.c **** * Return:
+ 240:Generated_Source\PSoC5/Track_Hold_2.c **** *  void
+ 241:Generated_Source\PSoC5/Track_Hold_2.c **** *
+ 242:Generated_Source\PSoC5/Track_Hold_2.c **** *******************************************************************************/
+ 243:Generated_Source\PSoC5/Track_Hold_2.c **** void Track_Hold_2_SetPower(uint8 power) 
+ 244:Generated_Source\PSoC5/Track_Hold_2.c **** {
+  96              		.loc 1 244 0
+  97              		.cfi_startproc
+  98              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  C:\Users\User\AppData\Local\Temp\cc1uyjAc.s 			page 7
+
+
+  99              		@ frame_needed = 0, uses_anonymous_args = 0
+ 100              		@ link register save eliminated.
+ 101              	.LVL0:
+ 245:Generated_Source\PSoC5/Track_Hold_2.c ****     uint8 tmpCR;
+ 246:Generated_Source\PSoC5/Track_Hold_2.c **** 
+ 247:Generated_Source\PSoC5/Track_Hold_2.c ****     /* Sets drive bits in SC Block Control Register 1:  SCxx_CR[1:0] */
+ 248:Generated_Source\PSoC5/Track_Hold_2.c ****     tmpCR = Track_Hold_2_CR1_REG & (uint8)(~Track_Hold_2_DRIVE_MASK);
+ 102              		.loc 1 248 0
+ 103 0000 044A     		ldr	r2, .L8
+ 104 0002 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 105 0004 03F0FC03 		and	r3, r3, #252
+ 106              	.LVL1:
+ 249:Generated_Source\PSoC5/Track_Hold_2.c ****     tmpCR |= (power & Track_Hold_2_DRIVE_MASK);
+ 107              		.loc 1 249 0
+ 108 0008 00F00300 		and	r0, r0, #3
+ 109              	.LVL2:
+ 110 000c 1843     		orrs	r0, r0, r3
+ 111              	.LVL3:
+ 250:Generated_Source\PSoC5/Track_Hold_2.c ****     Track_Hold_2_CR1_REG = tmpCR;
+ 112              		.loc 1 250 0
+ 113 000e 1070     		strb	r0, [r2]
+ 114 0010 7047     		bx	lr
+ 115              	.L9:
+ 116 0012 00BF     		.align	2
+ 117              	.L8:
+ 118 0014 05580040 		.word	1073764357
+ 119              		.cfi_endproc
+ 120              	.LFE4:
+ 121              		.size	Track_Hold_2_SetPower, .-Track_Hold_2_SetPower
+ 122              		.section	.text.Track_Hold_2_Init,"ax",%progbits
+ 123              		.align	2
+ 124              		.global	Track_Hold_2_Init
+ 125              		.thumb
+ 126              		.thumb_func
+ 127              		.type	Track_Hold_2_Init, %function
+ 128              	Track_Hold_2_Init:
+ 129              	.LFB0:
+  53:Generated_Source\PSoC5/Track_Hold_2.c ****     /* Configure SC Block based on selected Sample/Track type */
+ 130              		.loc 1 53 0
+ 131              		.cfi_startproc
+ 132              		@ args = 0, pretend = 0, frame = 0
+ 133              		@ frame_needed = 0, uses_anonymous_args = 0
+ 134 0000 08B5     		push	{r3, lr}
+ 135              		.cfi_def_cfa_offset 8
+ 136              		.cfi_offset 3, -8
+ 137              		.cfi_offset 14, -4
+  80:Generated_Source\PSoC5/Track_Hold_2.c ****         
+ 138              		.loc 1 80 0
+ 139 0002 0E22     		movs	r2, #14
+ 140 0004 084B     		ldr	r3, .L12
+ 141 0006 1A70     		strb	r2, [r3]
+  83:Generated_Source\PSoC5/Track_Hold_2.c ****                                    Track_Hold_2_DIV2_ENABLE |
+ 142              		.loc 1 83 0
+ 143 0008 1822     		movs	r2, #24
+ 144 000a 0133     		adds	r3, r3, #1
+ 145 000c 1A70     		strb	r2, [r3]
+  88:Generated_Source\PSoC5/Track_Hold_2.c ****                                    Track_Hold_2_REDC_00 |
+ARM GAS  C:\Users\User\AppData\Local\Temp\cc1uyjAc.s 			page 8
+
+
+ 146              		.loc 1 88 0
+ 147 000e 8122     		movs	r2, #129
+ 148 0010 0133     		adds	r3, r3, #1
+ 149 0012 1A70     		strb	r2, [r3]
+  94:Generated_Source\PSoC5/Track_Hold_2.c ****     
+ 150              		.loc 1 94 0
+ 151 0014 054A     		ldr	r2, .L12+4
+ 152 0016 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 153 0018 43F00803 		orr	r3, r3, #8
+ 154 001c 1370     		strb	r3, [r2]
+  97:Generated_Source\PSoC5/Track_Hold_2.c **** }
+ 155              		.loc 1 97 0
+ 156 001e 0320     		movs	r0, #3
+ 157 0020 FFF7FEFF 		bl	Track_Hold_2_SetPower
+ 158              	.LVL4:
+ 159 0024 08BD     		pop	{r3, pc}
+ 160              	.L13:
+ 161 0026 00BF     		.align	2
+ 162              	.L12:
+ 163 0028 04580040 		.word	1073764356
+ 164 002c 1B5A0040 		.word	1073764891
+ 165              		.cfi_endproc
+ 166              	.LFE0:
+ 167              		.size	Track_Hold_2_Init, .-Track_Hold_2_Init
+ 168              		.section	.text.Track_Hold_2_Start,"ax",%progbits
+ 169              		.align	2
+ 170              		.global	Track_Hold_2_Start
+ 171              		.thumb
+ 172              		.thumb_func
+ 173              		.type	Track_Hold_2_Start, %function
+ 174              	Track_Hold_2_Start:
+ 175              	.LFB2:
+ 172:Generated_Source\PSoC5/Track_Hold_2.c ****     /* If not Initialized then initialize all required hardware and software */
+ 176              		.loc 1 172 0
+ 177              		.cfi_startproc
+ 178              		@ args = 0, pretend = 0, frame = 0
+ 179              		@ frame_needed = 0, uses_anonymous_args = 0
+ 180 0000 08B5     		push	{r3, lr}
+ 181              		.cfi_def_cfa_offset 8
+ 182              		.cfi_offset 3, -8
+ 183              		.cfi_offset 14, -4
+ 174:Generated_Source\PSoC5/Track_Hold_2.c ****     {
+ 184              		.loc 1 174 0
+ 185 0002 054B     		ldr	r3, .L17
+ 186 0004 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 187 0006 23B9     		cbnz	r3, .L15
+ 176:Generated_Source\PSoC5/Track_Hold_2.c ****         Track_Hold_2_initVar = 1u;
+ 188              		.loc 1 176 0
+ 189 0008 FFF7FEFF 		bl	Track_Hold_2_Init
+ 190              	.LVL5:
+ 177:Generated_Source\PSoC5/Track_Hold_2.c ****     }
+ 191              		.loc 1 177 0
+ 192 000c 0122     		movs	r2, #1
+ 193 000e 024B     		ldr	r3, .L17
+ 194 0010 1A70     		strb	r2, [r3]
+ 195              	.L15:
+ 179:Generated_Source\PSoC5/Track_Hold_2.c **** }
+ARM GAS  C:\Users\User\AppData\Local\Temp\cc1uyjAc.s 			page 9
+
+
+ 196              		.loc 1 179 0
+ 197 0012 FFF7FEFF 		bl	Track_Hold_2_Enable
+ 198              	.LVL6:
+ 199 0016 08BD     		pop	{r3, pc}
+ 200              	.L18:
+ 201              		.align	2
+ 202              	.L17:
+ 203 0018 00000000 		.word	.LANCHOR0
+ 204              		.cfi_endproc
+ 205              	.LFE2:
+ 206              		.size	Track_Hold_2_Start, .-Track_Hold_2_Start
+ 207              		.global	Track_Hold_2_initVar
+ 208              		.bss
+ 209              		.set	.LANCHOR0,. + 0
+ 210              		.type	Track_Hold_2_initVar, %object
+ 211              		.size	Track_Hold_2_initVar, 1
+ 212              	Track_Hold_2_initVar:
+ 213 0000 00       		.space	1
+ 214              		.text
+ 215              	.Letext0:
+ 216              		.file 2 "Generated_Source\\PSoC5\\cytypes.h"
+ 217              		.section	.debug_info,"",%progbits
+ 218              	.Ldebug_info0:
+ 219 0000 5C010000 		.4byte	0x15c
+ 220 0004 0400     		.2byte	0x4
+ 221 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 222 000a 04       		.byte	0x4
+ 223 000b 01       		.uleb128 0x1
+ 224 000c 65000000 		.4byte	.LASF21
+ 225 0010 0C       		.byte	0xc
+ 226 0011 29000000 		.4byte	.LASF22
+ 227 0015 8B010000 		.4byte	.LASF23
+ 228 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 229 001d 00000000 		.4byte	0
+ 230 0021 00000000 		.4byte	.Ldebug_line0
+ 231 0025 02       		.uleb128 0x2
+ 232 0026 01       		.byte	0x1
+ 233 0027 06       		.byte	0x6
+ 234 0028 CA010000 		.4byte	.LASF0
+ 235 002c 02       		.uleb128 0x2
+ 236 002d 01       		.byte	0x1
+ 237 002e 08       		.byte	0x8
+ 238 002f 1B000000 		.4byte	.LASF1
+ 239 0033 02       		.uleb128 0x2
+ 240 0034 02       		.byte	0x2
+ 241 0035 05       		.byte	0x5
+ 242 0036 EB010000 		.4byte	.LASF2
+ 243 003a 02       		.uleb128 0x2
+ 244 003b 02       		.byte	0x2
+ 245 003c 07       		.byte	0x7
+ 246 003d B7010000 		.4byte	.LASF3
+ 247 0041 02       		.uleb128 0x2
+ 248 0042 04       		.byte	0x4
+ 249 0043 05       		.byte	0x5
+ 250 0044 68010000 		.4byte	.LASF4
+ 251 0048 02       		.uleb128 0x2
+ 252 0049 04       		.byte	0x4
+ARM GAS  C:\Users\User\AppData\Local\Temp\cc1uyjAc.s 			page 10
+
+
+ 253 004a 07       		.byte	0x7
+ 254 004b F9000000 		.4byte	.LASF5
+ 255 004f 02       		.uleb128 0x2
+ 256 0050 08       		.byte	0x8
+ 257 0051 05       		.byte	0x5
+ 258 0052 00000000 		.4byte	.LASF6
+ 259 0056 02       		.uleb128 0x2
+ 260 0057 08       		.byte	0x8
+ 261 0058 07       		.byte	0x7
+ 262 0059 0B010000 		.4byte	.LASF7
+ 263 005d 03       		.uleb128 0x3
+ 264 005e 04       		.byte	0x4
+ 265 005f 05       		.byte	0x5
+ 266 0060 696E7400 		.ascii	"int\000"
+ 267 0064 02       		.uleb128 0x2
+ 268 0065 04       		.byte	0x4
+ 269 0066 07       		.byte	0x7
+ 270 0067 0E000000 		.4byte	.LASF8
+ 271 006b 04       		.uleb128 0x4
+ 272 006c F3000000 		.4byte	.LASF12
+ 273 0070 02       		.byte	0x2
+ 274 0071 9201     		.2byte	0x192
+ 275 0073 2C000000 		.4byte	0x2c
+ 276 0077 02       		.uleb128 0x2
+ 277 0078 04       		.byte	0x4
+ 278 0079 04       		.byte	0x4
+ 279 007a 22010000 		.4byte	.LASF9
+ 280 007e 02       		.uleb128 0x2
+ 281 007f 08       		.byte	0x8
+ 282 0080 04       		.byte	0x4
+ 283 0081 84010000 		.4byte	.LASF10
+ 284 0085 02       		.uleb128 0x2
+ 285 0086 01       		.byte	0x1
+ 286 0087 08       		.byte	0x8
+ 287 0088 63010000 		.4byte	.LASF11
+ 288 008c 04       		.uleb128 0x4
+ 289 008d F5010000 		.4byte	.LASF13
+ 290 0091 02       		.byte	0x2
+ 291 0092 3C02     		.2byte	0x23c
+ 292 0094 98000000 		.4byte	0x98
+ 293 0098 05       		.uleb128 0x5
+ 294 0099 6B000000 		.4byte	0x6b
+ 295 009d 02       		.uleb128 0x2
+ 296 009e 08       		.byte	0x8
+ 297 009f 04       		.byte	0x4
+ 298 00a0 D6010000 		.4byte	.LASF14
+ 299 00a4 02       		.uleb128 0x2
+ 300 00a5 04       		.byte	0x4
+ 301 00a6 07       		.byte	0x7
+ 302 00a7 E2010000 		.4byte	.LASF15
+ 303 00ab 06       		.uleb128 0x6
+ 304 00ac 3D010000 		.4byte	.LASF16
+ 305 00b0 01       		.byte	0x1
+ 306 00b1 73       		.byte	0x73
+ 307 00b2 00000000 		.4byte	.LFB1
+ 308 00b6 28000000 		.4byte	.LFE1-.LFB1
+ 309 00ba 01       		.uleb128 0x1
+ARM GAS  C:\Users\User\AppData\Local\Temp\cc1uyjAc.s 			page 11
+
+
+ 310 00bb 9C       		.byte	0x9c
+ 311 00bc 06       		.uleb128 0x6
+ 312 00bd 51010000 		.4byte	.LASF17
+ 313 00c1 01       		.byte	0x1
+ 314 00c2 C5       		.byte	0xc5
+ 315 00c3 00000000 		.4byte	.LFB3
+ 316 00c7 1C000000 		.4byte	.LFE3-.LFB3
+ 317 00cb 01       		.uleb128 0x1
+ 318 00cc 9C       		.byte	0x9c
+ 319 00cd 07       		.uleb128 0x7
+ 320 00ce 4F000000 		.4byte	.LASF18
+ 321 00d2 01       		.byte	0x1
+ 322 00d3 F3       		.byte	0xf3
+ 323 00d4 00000000 		.4byte	.LFB4
+ 324 00d8 18000000 		.4byte	.LFE4-.LFB4
+ 325 00dc 01       		.uleb128 0x1
+ 326 00dd 9C       		.byte	0x9c
+ 327 00de 01010000 		.4byte	0x101
+ 328 00e2 08       		.uleb128 0x8
+ 329 00e3 FA010000 		.4byte	.LASF24
+ 330 00e7 01       		.byte	0x1
+ 331 00e8 F3       		.byte	0xf3
+ 332 00e9 6B000000 		.4byte	0x6b
+ 333 00ed 00000000 		.4byte	.LLST0
+ 334 00f1 09       		.uleb128 0x9
+ 335 00f2 00020000 		.4byte	.LASF25
+ 336 00f6 01       		.byte	0x1
+ 337 00f7 F5       		.byte	0xf5
+ 338 00f8 6B000000 		.4byte	0x6b
+ 339 00fc 21000000 		.4byte	.LLST1
+ 340 0100 00       		.byte	0
+ 341 0101 07       		.uleb128 0x7
+ 342 0102 06020000 		.4byte	.LASF19
+ 343 0106 01       		.byte	0x1
+ 344 0107 34       		.byte	0x34
+ 345 0108 00000000 		.4byte	.LFB0
+ 346 010c 30000000 		.4byte	.LFE0-.LFB0
+ 347 0110 01       		.uleb128 0x1
+ 348 0111 9C       		.byte	0x9c
+ 349 0112 26010000 		.4byte	0x126
+ 350 0116 0A       		.uleb128 0xa
+ 351 0117 24000000 		.4byte	.LVL4
+ 352 011b CD000000 		.4byte	0xcd
+ 353 011f 0B       		.uleb128 0xb
+ 354 0120 01       		.uleb128 0x1
+ 355 0121 50       		.byte	0x50
+ 356 0122 01       		.uleb128 0x1
+ 357 0123 33       		.byte	0x33
+ 358 0124 00       		.byte	0
+ 359 0125 00       		.byte	0
+ 360 0126 07       		.uleb128 0x7
+ 361 0127 71010000 		.4byte	.LASF20
+ 362 012b 01       		.byte	0x1
+ 363 012c AB       		.byte	0xab
+ 364 012d 00000000 		.4byte	.LFB2
+ 365 0131 1C000000 		.4byte	.LFE2-.LFB2
+ 366 0135 01       		.uleb128 0x1
+ARM GAS  C:\Users\User\AppData\Local\Temp\cc1uyjAc.s 			page 12
+
+
+ 367 0136 9C       		.byte	0x9c
+ 368 0137 4E010000 		.4byte	0x14e
+ 369 013b 0C       		.uleb128 0xc
+ 370 013c 0C000000 		.4byte	.LVL5
+ 371 0140 01010000 		.4byte	0x101
+ 372 0144 0C       		.uleb128 0xc
+ 373 0145 16000000 		.4byte	.LVL6
+ 374 0149 AB000000 		.4byte	0xab
+ 375 014d 00       		.byte	0
+ 376 014e 0D       		.uleb128 0xd
+ 377 014f 28010000 		.4byte	.LASF26
+ 378 0153 01       		.byte	0x1
+ 379 0154 1B       		.byte	0x1b
+ 380 0155 6B000000 		.4byte	0x6b
+ 381 0159 05       		.uleb128 0x5
+ 382 015a 03       		.byte	0x3
+ 383 015b 00000000 		.4byte	Track_Hold_2_initVar
+ 384 015f 00       		.byte	0
+ 385              		.section	.debug_abbrev,"",%progbits
+ 386              	.Ldebug_abbrev0:
+ 387 0000 01       		.uleb128 0x1
+ 388 0001 11       		.uleb128 0x11
+ 389 0002 01       		.byte	0x1
+ 390 0003 25       		.uleb128 0x25
+ 391 0004 0E       		.uleb128 0xe
+ 392 0005 13       		.uleb128 0x13
+ 393 0006 0B       		.uleb128 0xb
+ 394 0007 03       		.uleb128 0x3
+ 395 0008 0E       		.uleb128 0xe
+ 396 0009 1B       		.uleb128 0x1b
+ 397 000a 0E       		.uleb128 0xe
+ 398 000b 55       		.uleb128 0x55
+ 399 000c 17       		.uleb128 0x17
+ 400 000d 11       		.uleb128 0x11
+ 401 000e 01       		.uleb128 0x1
+ 402 000f 10       		.uleb128 0x10
+ 403 0010 17       		.uleb128 0x17
+ 404 0011 00       		.byte	0
+ 405 0012 00       		.byte	0
+ 406 0013 02       		.uleb128 0x2
+ 407 0014 24       		.uleb128 0x24
+ 408 0015 00       		.byte	0
+ 409 0016 0B       		.uleb128 0xb
+ 410 0017 0B       		.uleb128 0xb
+ 411 0018 3E       		.uleb128 0x3e
+ 412 0019 0B       		.uleb128 0xb
+ 413 001a 03       		.uleb128 0x3
+ 414 001b 0E       		.uleb128 0xe
+ 415 001c 00       		.byte	0
+ 416 001d 00       		.byte	0
+ 417 001e 03       		.uleb128 0x3
+ 418 001f 24       		.uleb128 0x24
+ 419 0020 00       		.byte	0
+ 420 0021 0B       		.uleb128 0xb
+ 421 0022 0B       		.uleb128 0xb
+ 422 0023 3E       		.uleb128 0x3e
+ 423 0024 0B       		.uleb128 0xb
+ARM GAS  C:\Users\User\AppData\Local\Temp\cc1uyjAc.s 			page 13
+
+
+ 424 0025 03       		.uleb128 0x3
+ 425 0026 08       		.uleb128 0x8
+ 426 0027 00       		.byte	0
+ 427 0028 00       		.byte	0
+ 428 0029 04       		.uleb128 0x4
+ 429 002a 16       		.uleb128 0x16
+ 430 002b 00       		.byte	0
+ 431 002c 03       		.uleb128 0x3
+ 432 002d 0E       		.uleb128 0xe
+ 433 002e 3A       		.uleb128 0x3a
+ 434 002f 0B       		.uleb128 0xb
+ 435 0030 3B       		.uleb128 0x3b
+ 436 0031 05       		.uleb128 0x5
+ 437 0032 49       		.uleb128 0x49
+ 438 0033 13       		.uleb128 0x13
+ 439 0034 00       		.byte	0
+ 440 0035 00       		.byte	0
+ 441 0036 05       		.uleb128 0x5
+ 442 0037 35       		.uleb128 0x35
+ 443 0038 00       		.byte	0
+ 444 0039 49       		.uleb128 0x49
+ 445 003a 13       		.uleb128 0x13
+ 446 003b 00       		.byte	0
+ 447 003c 00       		.byte	0
+ 448 003d 06       		.uleb128 0x6
+ 449 003e 2E       		.uleb128 0x2e
+ 450 003f 00       		.byte	0
+ 451 0040 3F       		.uleb128 0x3f
+ 452 0041 19       		.uleb128 0x19
+ 453 0042 03       		.uleb128 0x3
+ 454 0043 0E       		.uleb128 0xe
+ 455 0044 3A       		.uleb128 0x3a
+ 456 0045 0B       		.uleb128 0xb
+ 457 0046 3B       		.uleb128 0x3b
+ 458 0047 0B       		.uleb128 0xb
+ 459 0048 27       		.uleb128 0x27
+ 460 0049 19       		.uleb128 0x19
+ 461 004a 11       		.uleb128 0x11
+ 462 004b 01       		.uleb128 0x1
+ 463 004c 12       		.uleb128 0x12
+ 464 004d 06       		.uleb128 0x6
+ 465 004e 40       		.uleb128 0x40
+ 466 004f 18       		.uleb128 0x18
+ 467 0050 9742     		.uleb128 0x2117
+ 468 0052 19       		.uleb128 0x19
+ 469 0053 00       		.byte	0
+ 470 0054 00       		.byte	0
+ 471 0055 07       		.uleb128 0x7
+ 472 0056 2E       		.uleb128 0x2e
+ 473 0057 01       		.byte	0x1
+ 474 0058 3F       		.uleb128 0x3f
+ 475 0059 19       		.uleb128 0x19
+ 476 005a 03       		.uleb128 0x3
+ 477 005b 0E       		.uleb128 0xe
+ 478 005c 3A       		.uleb128 0x3a
+ 479 005d 0B       		.uleb128 0xb
+ 480 005e 3B       		.uleb128 0x3b
+ARM GAS  C:\Users\User\AppData\Local\Temp\cc1uyjAc.s 			page 14
+
+
+ 481 005f 0B       		.uleb128 0xb
+ 482 0060 27       		.uleb128 0x27
+ 483 0061 19       		.uleb128 0x19
+ 484 0062 11       		.uleb128 0x11
+ 485 0063 01       		.uleb128 0x1
+ 486 0064 12       		.uleb128 0x12
+ 487 0065 06       		.uleb128 0x6
+ 488 0066 40       		.uleb128 0x40
+ 489 0067 18       		.uleb128 0x18
+ 490 0068 9742     		.uleb128 0x2117
+ 491 006a 19       		.uleb128 0x19
+ 492 006b 01       		.uleb128 0x1
+ 493 006c 13       		.uleb128 0x13
+ 494 006d 00       		.byte	0
+ 495 006e 00       		.byte	0
+ 496 006f 08       		.uleb128 0x8
+ 497 0070 05       		.uleb128 0x5
+ 498 0071 00       		.byte	0
+ 499 0072 03       		.uleb128 0x3
+ 500 0073 0E       		.uleb128 0xe
+ 501 0074 3A       		.uleb128 0x3a
+ 502 0075 0B       		.uleb128 0xb
+ 503 0076 3B       		.uleb128 0x3b
+ 504 0077 0B       		.uleb128 0xb
+ 505 0078 49       		.uleb128 0x49
+ 506 0079 13       		.uleb128 0x13
+ 507 007a 02       		.uleb128 0x2
+ 508 007b 17       		.uleb128 0x17
+ 509 007c 00       		.byte	0
+ 510 007d 00       		.byte	0
+ 511 007e 09       		.uleb128 0x9
+ 512 007f 34       		.uleb128 0x34
+ 513 0080 00       		.byte	0
+ 514 0081 03       		.uleb128 0x3
+ 515 0082 0E       		.uleb128 0xe
+ 516 0083 3A       		.uleb128 0x3a
+ 517 0084 0B       		.uleb128 0xb
+ 518 0085 3B       		.uleb128 0x3b
+ 519 0086 0B       		.uleb128 0xb
+ 520 0087 49       		.uleb128 0x49
+ 521 0088 13       		.uleb128 0x13
+ 522 0089 02       		.uleb128 0x2
+ 523 008a 17       		.uleb128 0x17
+ 524 008b 00       		.byte	0
+ 525 008c 00       		.byte	0
+ 526 008d 0A       		.uleb128 0xa
+ 527 008e 898201   		.uleb128 0x4109
+ 528 0091 01       		.byte	0x1
+ 529 0092 11       		.uleb128 0x11
+ 530 0093 01       		.uleb128 0x1
+ 531 0094 31       		.uleb128 0x31
+ 532 0095 13       		.uleb128 0x13
+ 533 0096 00       		.byte	0
+ 534 0097 00       		.byte	0
+ 535 0098 0B       		.uleb128 0xb
+ 536 0099 8A8201   		.uleb128 0x410a
+ 537 009c 00       		.byte	0
+ARM GAS  C:\Users\User\AppData\Local\Temp\cc1uyjAc.s 			page 15
+
+
+ 538 009d 02       		.uleb128 0x2
+ 539 009e 18       		.uleb128 0x18
+ 540 009f 9142     		.uleb128 0x2111
+ 541 00a1 18       		.uleb128 0x18
+ 542 00a2 00       		.byte	0
+ 543 00a3 00       		.byte	0
+ 544 00a4 0C       		.uleb128 0xc
+ 545 00a5 898201   		.uleb128 0x4109
+ 546 00a8 00       		.byte	0
+ 547 00a9 11       		.uleb128 0x11
+ 548 00aa 01       		.uleb128 0x1
+ 549 00ab 31       		.uleb128 0x31
+ 550 00ac 13       		.uleb128 0x13
+ 551 00ad 00       		.byte	0
+ 552 00ae 00       		.byte	0
+ 553 00af 0D       		.uleb128 0xd
+ 554 00b0 34       		.uleb128 0x34
+ 555 00b1 00       		.byte	0
+ 556 00b2 03       		.uleb128 0x3
+ 557 00b3 0E       		.uleb128 0xe
+ 558 00b4 3A       		.uleb128 0x3a
+ 559 00b5 0B       		.uleb128 0xb
+ 560 00b6 3B       		.uleb128 0x3b
+ 561 00b7 0B       		.uleb128 0xb
+ 562 00b8 49       		.uleb128 0x49
+ 563 00b9 13       		.uleb128 0x13
+ 564 00ba 3F       		.uleb128 0x3f
+ 565 00bb 19       		.uleb128 0x19
+ 566 00bc 02       		.uleb128 0x2
+ 567 00bd 18       		.uleb128 0x18
+ 568 00be 00       		.byte	0
+ 569 00bf 00       		.byte	0
+ 570 00c0 00       		.byte	0
+ 571              		.section	.debug_loc,"",%progbits
+ 572              	.Ldebug_loc0:
+ 573              	.LLST0:
+ 574 0000 00000000 		.4byte	.LVL0
+ 575 0004 0C000000 		.4byte	.LVL2
+ 576 0008 0100     		.2byte	0x1
+ 577 000a 50       		.byte	0x50
+ 578 000b 0C000000 		.4byte	.LVL2
+ 579 000f 18000000 		.4byte	.LFE4
+ 580 0013 0400     		.2byte	0x4
+ 581 0015 F3       		.byte	0xf3
+ 582 0016 01       		.uleb128 0x1
+ 583 0017 50       		.byte	0x50
+ 584 0018 9F       		.byte	0x9f
+ 585 0019 00000000 		.4byte	0
+ 586 001d 00000000 		.4byte	0
+ 587              	.LLST1:
+ 588 0021 08000000 		.4byte	.LVL1
+ 589 0025 0E000000 		.4byte	.LVL3
+ 590 0029 0100     		.2byte	0x1
+ 591 002b 53       		.byte	0x53
+ 592 002c 0E000000 		.4byte	.LVL3
+ 593 0030 18000000 		.4byte	.LFE4
+ 594 0034 0100     		.2byte	0x1
+ARM GAS  C:\Users\User\AppData\Local\Temp\cc1uyjAc.s 			page 16
+
+
+ 595 0036 50       		.byte	0x50
+ 596 0037 00000000 		.4byte	0
+ 597 003b 00000000 		.4byte	0
+ 598              		.section	.debug_aranges,"",%progbits
+ 599 0000 3C000000 		.4byte	0x3c
+ 600 0004 0200     		.2byte	0x2
+ 601 0006 00000000 		.4byte	.Ldebug_info0
+ 602 000a 04       		.byte	0x4
+ 603 000b 00       		.byte	0
+ 604 000c 0000     		.2byte	0
+ 605 000e 0000     		.2byte	0
+ 606 0010 00000000 		.4byte	.LFB1
+ 607 0014 28000000 		.4byte	.LFE1-.LFB1
+ 608 0018 00000000 		.4byte	.LFB3
+ 609 001c 1C000000 		.4byte	.LFE3-.LFB3
+ 610 0020 00000000 		.4byte	.LFB4
+ 611 0024 18000000 		.4byte	.LFE4-.LFB4
+ 612 0028 00000000 		.4byte	.LFB0
+ 613 002c 30000000 		.4byte	.LFE0-.LFB0
+ 614 0030 00000000 		.4byte	.LFB2
+ 615 0034 1C000000 		.4byte	.LFE2-.LFB2
+ 616 0038 00000000 		.4byte	0
+ 617 003c 00000000 		.4byte	0
+ 618              		.section	.debug_ranges,"",%progbits
+ 619              	.Ldebug_ranges0:
+ 620 0000 00000000 		.4byte	.LFB1
+ 621 0004 28000000 		.4byte	.LFE1
+ 622 0008 00000000 		.4byte	.LFB3
+ 623 000c 1C000000 		.4byte	.LFE3
+ 624 0010 00000000 		.4byte	.LFB4
+ 625 0014 18000000 		.4byte	.LFE4
+ 626 0018 00000000 		.4byte	.LFB0
+ 627 001c 30000000 		.4byte	.LFE0
+ 628 0020 00000000 		.4byte	.LFB2
+ 629 0024 1C000000 		.4byte	.LFE2
+ 630 0028 00000000 		.4byte	0
+ 631 002c 00000000 		.4byte	0
+ 632              		.section	.debug_line,"",%progbits
+ 633              	.Ldebug_line0:
+ 634 0000 B3000000 		.section	.debug_str,"MS",%progbits,1
+ 634      02004900 
+ 634      00000201 
+ 634      FB0E0D00 
+ 634      01010101 
+ 635              	.LASF6:
+ 636 0000 6C6F6E67 		.ascii	"long long int\000"
+ 636      206C6F6E 
+ 636      6720696E 
+ 636      7400
+ 637              	.LASF8:
+ 638 000e 756E7369 		.ascii	"unsigned int\000"
+ 638      676E6564 
+ 638      20696E74 
+ 638      00
+ 639              	.LASF1:
+ 640 001b 756E7369 		.ascii	"unsigned char\000"
+ 640      676E6564 
+ARM GAS  C:\Users\User\AppData\Local\Temp\cc1uyjAc.s 			page 17
+
+
+ 640      20636861 
+ 640      7200
+ 641              	.LASF22:
+ 642 0029 47656E65 		.ascii	"Generated_Source\\PSoC5\\Track_Hold_2.c\000"
+ 642      72617465 
+ 642      645F536F 
+ 642      75726365 
+ 642      5C50536F 
+ 643              	.LASF18:
+ 644 004f 54726163 		.ascii	"Track_Hold_2_SetPower\000"
+ 644      6B5F486F 
+ 644      6C645F32 
+ 644      5F536574 
+ 644      506F7765 
+ 645              	.LASF21:
+ 646 0065 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 646      43313120 
+ 646      352E342E 
+ 646      31203230 
+ 646      31363036 
+ 647 0098 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 647      20726576 
+ 647      6973696F 
+ 647      6E203233 
+ 647      37373135 
+ 648 00cb 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 648      66756E63 
+ 648      74696F6E 
+ 648      2D736563 
+ 648      74696F6E 
+ 649              	.LASF12:
+ 650 00f3 75696E74 		.ascii	"uint8\000"
+ 650      3800
+ 651              	.LASF5:
+ 652 00f9 6C6F6E67 		.ascii	"long unsigned int\000"
+ 652      20756E73 
+ 652      69676E65 
+ 652      6420696E 
+ 652      7400
+ 653              	.LASF7:
+ 654 010b 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 654      206C6F6E 
+ 654      6720756E 
+ 654      7369676E 
+ 654      65642069 
+ 655              	.LASF9:
+ 656 0122 666C6F61 		.ascii	"float\000"
+ 656      7400
+ 657              	.LASF26:
+ 658 0128 54726163 		.ascii	"Track_Hold_2_initVar\000"
+ 658      6B5F486F 
+ 658      6C645F32 
+ 658      5F696E69 
+ 658      74566172 
+ 659              	.LASF16:
+ 660 013d 54726163 		.ascii	"Track_Hold_2_Enable\000"
+ 660      6B5F486F 
+ARM GAS  C:\Users\User\AppData\Local\Temp\cc1uyjAc.s 			page 18
+
+
+ 660      6C645F32 
+ 660      5F456E61 
+ 660      626C6500 
+ 661              	.LASF17:
+ 662 0151 54726163 		.ascii	"Track_Hold_2_Stop\000"
+ 662      6B5F486F 
+ 662      6C645F32 
+ 662      5F53746F 
+ 662      7000
+ 663              	.LASF11:
+ 664 0163 63686172 		.ascii	"char\000"
+ 664      00
+ 665              	.LASF4:
+ 666 0168 6C6F6E67 		.ascii	"long int\000"
+ 666      20696E74 
+ 666      00
+ 667              	.LASF20:
+ 668 0171 54726163 		.ascii	"Track_Hold_2_Start\000"
+ 668      6B5F486F 
+ 668      6C645F32 
+ 668      5F537461 
+ 668      727400
+ 669              	.LASF10:
+ 670 0184 646F7562 		.ascii	"double\000"
+ 670      6C6500
+ 671              	.LASF23:
+ 672 018b 443A5C56 		.ascii	"D:\\VM_share\\MCU_PSoC_FPGA\\WOTAN\\WOTAN.cydsn\000"
+ 672      4D5F7368 
+ 672      6172655C 
+ 672      4D43555F 
+ 672      50536F43 
+ 673              	.LASF3:
+ 674 01b7 73686F72 		.ascii	"short unsigned int\000"
+ 674      7420756E 
+ 674      7369676E 
+ 674      65642069 
+ 674      6E7400
+ 675              	.LASF0:
+ 676 01ca 7369676E 		.ascii	"signed char\000"
+ 676      65642063 
+ 676      68617200 
+ 677              	.LASF14:
+ 678 01d6 6C6F6E67 		.ascii	"long double\000"
+ 678      20646F75 
+ 678      626C6500 
+ 679              	.LASF15:
+ 680 01e2 73697A65 		.ascii	"sizetype\000"
+ 680      74797065 
+ 680      00
+ 681              	.LASF2:
+ 682 01eb 73686F72 		.ascii	"short int\000"
+ 682      7420696E 
+ 682      7400
+ 683              	.LASF13:
+ 684 01f5 72656738 		.ascii	"reg8\000"
+ 684      00
+ 685              	.LASF24:
+ARM GAS  C:\Users\User\AppData\Local\Temp\cc1uyjAc.s 			page 19
+
+
+ 686 01fa 706F7765 		.ascii	"power\000"
+ 686      7200
+ 687              	.LASF25:
+ 688 0200 746D7043 		.ascii	"tmpCR\000"
+ 688      5200
+ 689              	.LASF19:
+ 690 0206 54726163 		.ascii	"Track_Hold_2_Init\000"
+ 690      6B5F486F 
+ 690      6C645F32 
+ 690      5F496E69 
+ 690      7400
+ 691              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran
