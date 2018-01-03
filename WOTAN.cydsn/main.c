@@ -33,8 +33,8 @@
 #define STOP_CLOCK          1
 
 // UART interface
-#define  UART_BUF_IN        100
-#define  UART_BUF_OUT       80
+#define  UART_BUF_IN         100
+#define  UART_BUF_OUT        80
 #define  KEY_RUN             'r'
 #define  KEY_RUN_ALT         'v'
 #define  KEY_RUN_AND_SHOW    's'
@@ -104,7 +104,7 @@ struct sequenceParams *twMPI = &twMPI_params;
 
 /* Defines for DMA_DAC_1 */
 #define DMA_DAC_1_BYTES_PER_BURST 1
-#define DMA_DAC_1_REQUEST_PER_BURST 1
+#define DMA_DAC_1_REQUEST_PER_BURST 1   
 #define DMA_DAC_1_SRC_BASE (FLASH_CH1)
 #define DMA_DAC_1_DST_BASE (CYDEV_PERIPH_BASE)
 
@@ -176,6 +176,15 @@ int     rxBuf;
 uint8   run_count_DAC_1=0;
 uint8   nextRun = FALSE;
 
+// USBUART (USBFS)
+#define USBUART_BUFFER_SIZE (64u)
+#define USBFS_DEVICE    (0u)
+#define USBFS_TX_SIZE   60
+uint16 count;
+uint8 buffer[USBFS_TX_SIZE];
+uint8 data_tx[4];
+
+
 // Two adc buffers 
 uint16 signal_adc_1[NSAMPLES_ADC]; 
 uint16 signal_adc_2[NSAMPLES_ADC];
@@ -188,6 +197,7 @@ void generate_sequence(void);
 void run_sequence(char);
 void display_results(void);
 void uart_interface(void);
+void usbfs_send_data(void);
 void dma_dac_1_init(void);
 void dma_dac_2_init(void);
 void dma_dac_3_init(void);
@@ -218,8 +228,9 @@ int main(void)
    
     for(;;) 
     {       
-        // Control interface via UART for Putty or Matlab/Octave
+        // Control interface via UART for Putty or Matlab/Octave/Python
         uart_interface();
+        usbfs_send_data();
     }
 }
 /* END MAIN() ***********************************/
@@ -260,7 +271,7 @@ void init_components(void)
     
     // Components for user interface and debugging
     ChannelSel_Start();
-        ChannelSel_Select(current_chan=0);
+        ChannelSel_Select(current_chan=4);
     UART_1_Start();
     CompTrigger_Start();
         isrTrigger_StartEx( isr_triggerIn );
@@ -271,6 +282,7 @@ void init_components(void)
     isr_ADC_1_StartEx( isr_ADC_1_done );
     isr_ADC_2_StartEx( isr_ADC_2_done );
 
+    USBUART_Start(USBFS_DEVICE, USBUART_5V_OPERATION);
 }
 
 void show_default_message(void)
@@ -328,6 +340,79 @@ void display_results(void)
     
     show_default_message();  
 }
+
+void usbfs_send_data(void)
+{
+     /* Host can send double SET_INTERFACE request. */
+    if (0u != USBUART_IsConfigurationChanged())
+    {
+        /* Initialize IN endpoints when device is configured. */
+        if (0u != USBUART_GetConfiguration())
+        {
+            /* Enumeration is done, enable OUT endpoint to receive data 
+             * from host. */
+            USBUART_CDC_Init();
+        }
+    }
+
+    /* Service USB CDC when device is configured. */
+    if (0u != USBUART_GetConfiguration())
+    {
+        /* Check for input data from host. */
+        if (0u != USBUART_DataIsReady())
+        {
+            /* Read received data and re-enable OUT endpoint. */
+            count = USBUART_GetAll(buffer);
+
+            if (0u != count)
+            {
+                LED_Write(1u);
+                CyDelay(50);
+                LED_Write(0u);
+                
+                /* Avoid interference with the UART_1 component */
+                UART_1_ClearRxBuffer();
+                UART_1_ClearTxBuffer();
+                
+                /* Wait until component is ready to send data to host. */
+                while (0u == USBUART_CDCIsReady())
+                {
+                }
+                
+                if ( buffer[0] == KEY_DAC1 || buffer[0] == KEY_DAC2 || buffer[0] == KEY_DAC3 || buffer[0] == KEY_DAC4 || buffer[0] == KEY_SIG_IN)
+                    ChannelSel_Select( buffer[0]-1 );
+                if ( buffer[0] == KEY_RUN || buffer[0] == KEY_RUN_ALT)
+                    run_sequence( buffer[0] );
+                if ( buffer[0] == KEY_RESET )
+                    CySoftwareReset(); // If Putty is used: this ends the session!
+                    
+                if ( buffer[0] == KEY_SEND_BYTE_DAT )
+                {
+                    LED_Write(1u);
+                    // turn uint16 arrays into byte stream (ADC 1 and ADC 2 separate)
+                    // ODD samples
+                    for(int j=0;j<NSAMPLES_ADC/USBFS_TX_SIZE*DMA_ADC_1_BYTES_PER_BURST;j++)
+                    {
+                        while (0u == USBUART_CDCIsReady())
+                        {
+                        }                  
+                        USBUART_PutData( ((uint8 *) (signal_adc_1)+(j*USBFS_TX_SIZE) ), USBFS_TX_SIZE);  
+                    }
+                    // EVEN samples
+                    for(int j=0;j<NSAMPLES_ADC/USBFS_TX_SIZE*DMA_ADC_1_BYTES_PER_BURST;j++)
+                    {
+                        while (0u == USBUART_CDCIsReady())
+                        {
+                        }                  
+                        USBUART_PutData( ((uint8 *) (signal_adc_2)+(j*USBFS_TX_SIZE) ), USBFS_TX_SIZE);  
+                    }                    
+                    LED_Write(0u);
+                }
+
+            }
+        }
+    }
+} //usbfs_send_data()
 
 void set_sequence_params(void)
 {
