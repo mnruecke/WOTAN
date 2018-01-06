@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 """
 %  ========================================
  % 
@@ -22,7 +21,7 @@
  % You should have received a copy of the GNU General Public License
  % along with WOTAN.  If not, see <http://www.gnu.org/licenses/>.
  % ========================================
-% Description: code stub for usbfs data transfer - I
+% Description: control script for usbfs data transfer
 %
 % control script for interacting with the WOTAN-PSoC firmware.
 %
@@ -49,14 +48,15 @@ import timeit
 
 """ 0) main settings """
 # 0.1) serial port
+#      this script targets the faster USBUART routed to the Micro-USB-B socket
 com_port         = '\\\\.\\COM24'
-baudrate         = 115200
-time_out         = 10
+baudrate         = 0 # USBFS component ignores this parameter
+time_out         = 1 # [s]; this script should retrieve the 60 kB data in << 1s
 
 # 0.2 sequence details
 bytesPerSample   = 2
 timePerSample    = 0.0005 # sample time in ms
-sequDuration     = 15 # sequence duration in ms
+sequDuration     = 15 # sequence duration in ms (not counting start- and end ramp)
 numOfSamples     = int(sequDuration/timePerSample)
 bufInputSize     = numOfSamples * bytesPerSample
 
@@ -67,7 +67,7 @@ nameDataFiles    = '3D_mpi_data'  # save data to files with continuous numbering
 """ END - main settings """
 
 # 0.4) list of commands defined in WOTAN
-p_sel_chan  = b'5' # default: '5' (measure signal between GPIO 0.6 and 0.7), '1'..'4': get DAC output 1..4 
+p_sel_chan  = b'1' # default: '5' (measure signal between GPIO 0.6 and 0.7), '1'..'4': get DAC output 1..4 
 p_run_sequ  = b'r'
 p_get_data  = b'o'
 p_reset     = b'e'
@@ -77,11 +77,11 @@ try: # open and interact with serial port
     ser = serial.Serial( com_port, baudrate, timeout=time_out)
     
     start = timeit.default_timer()
-    # run MPI sequence on psoc
-#    ser.write( p_sel_chan )
-#    time.sleep(0.3)
-#    ser.write( p_run_sequ )
-#    time.sleep(0.3)
+#   run MPI sequence on psoc
+    ser.write( p_sel_chan )
+    time.sleep(0.001)
+    ser.write( p_run_sequ )
+    time.sleep(0.001)
     ser.flushInput()
     time.sleep(0.001)
     ser.write( p_get_data )
@@ -96,11 +96,54 @@ try: # open and interact with serial port
 finally: # close serial port
     ser.close()
     
-adc1UNIONadc2 = np.arange(len(adc_data_int16))    
-adc1UNIONadc2[0::2] = adc_data_int16[0:int(len(adc_data_int16)/2)]
-adc1UNIONadc2[1::2] = adc_data_int16[int(len(adc_data_int16)/2):]
-    
-print(len(adc_data_bin))    
-print(stop-start)
 
-plt.plot(adc1UNIONadc2)
+
+if len(adc_data_bin) == numOfSamples*bytesPerSample: # check if data was received completely
+    # 3) data correction routines:
+    # find and correct scaling difference between ADC 1 (even samples)
+    # and ADC 2 (odd samples)
+    # (this method fails if signal has steps or goes into saturation!)
+    adc1UNIONadc2 = np.arange(len(adc_data_int16))    
+    adc1UNIONadc2[0::2] = adc_data_int16[0:int(len(adc_data_int16)/2)]
+    adc1UNIONadc2[1::2] = adc_data_int16[int(len(adc_data_int16)/2):]    
+    
+    adc1 = adc1UNIONadc2[0::2]
+    adc2 = adc1UNIONadc2[1::2]
+    
+    adc1DIVadc2 = 0;
+    for sp in range(len(adc1)):
+        adc1DIVadc2 += (adc1[sp]-adc2[sp])/(adc1[sp]+adc2[sp])*2/len(adc1)
+    
+    adc_data_corr = np.zeros(len(adc_data_int16))
+    adc_data_corr[0::2] = adc1
+    adc_data_corr[0::2] = adc_data_corr[0::2] *(1-adc1DIVadc2)
+    adc_data_corr[1::2] = adc2
+        
+    # 4) visualize data
+    dat_time = np.arange(0,sequDuration,timePerSample)
+    dat_sig  = adc_data_corr * adcVoltPerBit
+    plt.plot( dat_time, dat_sig, dat_time, dat_sig,'+')
+    plt.xlabel('time [ms]')
+    plt.ylabel('signal [V]')
+    plt.show()  
+    
+    
+    # 5) save data as ascii table
+    # write data in file with continuous numbering
+    cnt = 0
+    data_file_name = nameDataFiles + '_' + str(cnt) + '.txt'
+    while os.path.isfile( data_file_name ): #prevents overriding files
+        cnt += 1
+        data_file_name = nameDataFiles + '_' + str(cnt) + '.txt'
+    with open( data_file_name , 'w') as f:
+        for dat in adc_data_corr:
+            f.write("%s\n" % int(dat))
+        print( 'Data written to: ' + data_file_name +
+              '  (' + str(len(adc_data_int16)) + ' samples)')
+else:
+    print("\n\n\nPSoC doesn't seem ready. Please try again. " +\
+          "(WOTAN firmware requires approx. 5 sec. after " +\
+          "flash programming for sequence calculation.)\n\n\n")
+        
+print( "Data transfer time: " + "{0:0.3f}".format(stop-start) + "s"  )
+

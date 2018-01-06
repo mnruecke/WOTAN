@@ -215,25 +215,25 @@ CY_ISR_PROTO( isr_ADC_2_done );
 
 uint8 current_chan=0;
 uint8 count_of_runs=0;
+uint8 isDAC1Busy = FALSE;
 
 int main(void)
 {
-    CyGlobalIntEnable; /* Enable global interrupts. */
-
-    /* Place your initialization/startup code here (e.g. MyInst_Start()) */
+    // Initialization routines
+    CyGlobalIntEnable;
     init_components();
     if( *(FLASH_CH1 ) == 0 ) // Skip sequence generation if non-empty
-        generate_sequence();
+        generate_sequence(); // (calculation takes ~5 seconds on PSoC)
     show_default_message();
    
     for(;;) 
     {       
         // Control interface via UART for Putty or Matlab/Octave/Python
-        uart_interface();
-        usbfs_send_data();
+        uart_interface();  // for using USBUART included on Programmer Kit
+        usbfs_send_data(); // for using fast USBUART routed to the onboard Micro-USB-B socket
     }
-}
-/* END MAIN() ***********************************/
+}/* END MAIN() ***********************************/
+
 
 void init_components(void)
 {
@@ -379,13 +379,18 @@ void usbfs_send_data(void)
                 {
                 }
                 
+                /* Process firmware commands */
+                // 1) select a channel
                 if ( buffer[0] == KEY_DAC1 || buffer[0] == KEY_DAC2 || buffer[0] == KEY_DAC3 || buffer[0] == KEY_DAC4 || buffer[0] == KEY_SIG_IN)
-                    ChannelSel_Select( buffer[0]-1 );
+                        ChannelSel_Select( buffer[0]-1-'0' );
+                // 2) run sequence
                 if ( buffer[0] == KEY_RUN || buffer[0] == KEY_RUN_ALT)
                     run_sequence( buffer[0] );
+                // 3) reset firmware 
                 if ( buffer[0] == KEY_RESET )
                     CySoftwareReset(); // If Putty is used: this ends the session!
-                    
+                  
+                // 4) Get the binary data from the two uint16 ADC buffers
                 if ( buffer[0] == KEY_SEND_BYTE_DAT )
                 {
                     LED_Write(1u);
