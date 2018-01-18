@@ -49,7 +49,7 @@ import matplotlib.pyplot as plt
 
 """ 0) main settings """
 # 0.1) serial port
-com_port       = '\\\\.\\COM21'
+com_port       = '\\\\.\\COM3'
 baudrate       = 115200
 time_out       = 10
 
@@ -107,7 +107,7 @@ if len(adc_data_bin) == numOfSamples*bytesPerSample: # check if run was successf
     
     adc_data_corr = np.zeros(len(adc_data_int16))
     adc_data_corr[0::2] = adc1
-    adc_data_corr[0::2] = adc_data_corr[0::2]# *(1-adc1DIVadc2)
+    adc_data_corr[0::2] = adc_data_corr[0::2] *(1-adc1DIVadc2)
     adc_data_corr[1::2] = adc2
         
     # 4) visualize data

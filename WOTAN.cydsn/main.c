@@ -172,7 +172,6 @@ uint8 DMA_ADC_2_TD[N_TDS_ADC];
 // auxilliary variables
 char    sms         [UART_BUF_OUT];
 char    puttyIn     [UART_BUF_IN];
-char    puttyInBLE  [UART_BUF_IN];
 int     rxBuf;
 int     rxBufBLE;
 uint8   run_count_DAC_1=0;
@@ -185,6 +184,15 @@ uint8   nextRun = FALSE;
 uint16 count;
 uint8 buffer[USBFS_TX_SIZE];
 uint8 data_tx[4];
+
+// Bluetooth (command: 'BinaryABC' with A: packet number (1..30), B: command (1..not-implemented-yet), C: channel number (1..5)
+#define DATA_ORDER          "Binary"
+#define COMMAND_NUMBER      strlen(DATA_ORDER)
+#define CHANNEL_NUMBER      strlen(DATA_ORDER)+1
+#define PACKET_NUMBER       strlen(DATA_ORDER)+2
+#define PACKET_SIZE         500
+#define BYTES_PER_PACKET    4
+char    puttyInBLE          [UART_BUF_IN];
 
 
 // Two adc buffers 
@@ -228,7 +236,7 @@ int main(void)
     if( *(FLASH_CH1 ) == 0 ) // Skip sequence generation if non-empty
         generate_sequence(); // (calculation takes ~5 seconds on PSoC)
     show_default_message();
-  
+      
     for(;;) 
     {       
         // Control interface via UART for Putty or Matlab/Octave/Python
@@ -295,40 +303,29 @@ void init_components(void)
 void show_default_message(void)
 {
     UART_1_PutCRLF(2);
-    BLE_UART_PutCRLF(2);
     sprintf(sms, "Press '%c' to run the sequence and show the results (ASCII table)", KEY_RUN_AND_SHOW);
         UART_1_PutString(sms); UART_1_PutCRLF(1);
-        BLE_UART_PutString(sms); BLE_UART_PutCRLF(1);
     sprintf(sms, "Press '%c' to only run the sequence (No ASCII table, currently measured: Channel %d)", KEY_RUN,  current_chan +1);
         UART_1_PutString(sms); UART_1_PutCRLF(1);
-        BLE_UART_PutString(sms); BLE_UART_PutCRLF(1);
     sprintf(sms, "Press '%c' to only run the alternating sequence (odd: CH3 is off, even: CH4 is off)", KEY_RUN_ALT);
         UART_1_PutString(sms); UART_1_PutCRLF(1);
-        BLE_UART_PutString(sms); BLE_UART_PutCRLF(1);
     sprintf(sms, "Press '%c' to show last results (ASCII table)", KEY_SEND_ASCII_DAT);
         UART_1_PutString(sms); UART_1_PutCRLF(1);
-        BLE_UART_PutString(sms); BLE_UART_PutCRLF(1);
     sprintf(sms, "Press '%c' to switch to next channel and run the sequence)", KEY_RUN_NEXT_SHOW);
         UART_1_PutString(sms); UART_1_PutCRLF(1);
-        BLE_UART_PutString(sms); BLE_UART_PutCRLF(1);
     sprintf(sms, "Press '%c', '%c', '%c' or '%c' for measuring DAC 1..4 or '%c' for measuring GPIO P0.7", KEY_DAC1, KEY_DAC2, KEY_DAC3, KEY_DAC4, KEY_SIG_IN );
         UART_1_PutString(sms); UART_1_PutCRLF(1);
-        BLE_UART_PutString(sms); BLE_UART_PutCRLF(1);
     sprintf(sms, "Press '%c' to reset the device (Software reset)", KEY_RESET);
         UART_1_PutString(sms); UART_1_PutCRLF(1);
-        BLE_UART_PutString(sms); BLE_UART_PutCRLF(1);
     UART_1_PutCRLF(2);
-    BLE_UART_PutCRLF(2);
 }
 
 void show_channel_num(void)
 {
     sprintf(sms,"Currently selected channel for data monitoring: %d", current_chan+1 );
         UART_1_PutString(sms); UART_1_PutCRLF(1);
-        BLE_UART_PutString(sms); BLE_UART_PutCRLF(1);
     sprintf(sms,"Count of sequence runs after reset: %d", count_of_runs);
         UART_1_PutString(sms); UART_1_PutCRLF(1);
-        BLE_UART_PutString(sms); BLE_UART_PutCRLF(1);
 }
 
 void display_results(void)
@@ -337,14 +334,10 @@ void display_results(void)
     {
         sprintf(sms,"ADC_1 Value %d,0 us:\t  %d", i, signal_adc_1[i]);
             UART_1_PutString(sms);
-            BLE_UART_PutString(sms);
         UART_1_PutCRLF(1);
-        BLE_UART_PutCRLF(1);
         sprintf(sms,"ADC_2 Value %d,5 us:\t  %d", i, signal_adc_2[i]);
             UART_1_PutString(sms);
-            BLE_UART_PutString(sms);
         UART_1_PutCRLF(1);
-        BLE_UART_PutCRLF(1);
         
         // stop printing ascii table with any key:
         if( UART_1_GetRxBufferSize() != 0 )
@@ -353,17 +346,6 @@ void display_results(void)
            UART_1_PutCRLF(2);
            UART_1_PutString("Data listing aborted...\n\n");
            UART_1_PutCRLF(1);
-           CyDelay(10);
-           break;
-        }
-        
-        // BLE: stop printing ascii table with any key:
-        if( BLE_UART_GetRxBufferSize() != 0 )
-        {
-           BLE_UART_ClearRxBuffer();
-           BLE_UART_PutCRLF(2);
-           BLE_UART_PutString("Data listing aborted...\n\n");
-           BLE_UART_PutCRLF(1);
            CyDelay(10);
            break;
         }
@@ -480,8 +462,6 @@ void generate_sequence(void)
     // (overrides 'signal_adc_1[]' for buffering the calculations)
     UART_1_PutString("* Generate sequence...");
     UART_1_PutCRLF(1);
-    BLE_UART_PutString("* Generate sequence...");
-    BLE_UART_PutCRLF(1);
     int time_i;
     for(int channel_i=0; channel_i<NUM_CHANNELS; channel_i++)
     {
@@ -528,8 +508,6 @@ void generate_sequence(void)
     } 
     UART_1_PutString("* Sequence ready.");
     UART_1_PutCRLF(1);
-    BLE_UART_PutString("* Sequence ready.");
-    BLE_UART_PutCRLF(1);
 }
 
 void run_sequence(char selSequ)
@@ -671,107 +649,65 @@ void uart_interface(void)
 
 void ble_uart_interface(void)
 {
-    nextRun = TRUE; // used to avoid extern trigger from blocking the userinterface
-    // Control interface via UART for Putty or Matlab/Octave
+    // Control interface via bluetooth modul to be connected to BLE_UART
     if( (rxBufBLE = BLE_UART_GetRxBufferSize())!=0 )
     {
+        
         // 1) Read Terminal Input String into puttyIn[]
         for(int char_i=0; BLE_UART_GetRxBufferSize() !=0; char_i++)
         {
             puttyInBLE[char_i] = BLE_UART_GetChar();
             
             LED_Write( 1u ); // indicate received chars
-            CyDelay(50);
+            CyDelay(1);
             LED_Write( 0u );
-            CyDelay(50);
+            CyDelay(1);
         }
         
-        // Set new sequence parameters via uart
-        if( puttyInBLE[0] == 't' && puttyIn[1] == 't' && puttyIn[2] == 't')
-        {
-            set_sequence_params();
-        }   
         
-        // 3) Putty user interface
-        switch( puttyInBLE[0] )
+        // Get commands via bluetooth. Command structure: 'BinaryABCC'
+        // 'Binary': command prefix
+        // 'A': COMMAND_NUMBER (1..2)
+        // 'B': CHANNEL_NUMBER (1..5)
+        // 'CC': PACKET_NUMBER  (1..30) 
+        if( strncmp( puttyInBLE, DATA_ORDER, strlen(DATA_ORDER)) == 0 )
         {
-            case KEY_RUN_AND_SHOW: // run sequence and show results (2*NSAMPLES_ADC lines, ASCII formatted)
-                run_sequence(puttyInBLE[0]);
-                display_results();
-                show_channel_num();
-            break;
-                
-            case KEY_RUN: // run sequence (just running, no output)
-                run_sequence(puttyInBLE[0]);
-            break;
-                
-            case KEY_RUN_ALT: // run sequence - alternating channel 3 and 4 per run  (just running, no output)
-                run_sequence(puttyInBLE[0]);
-            break;
-            // 'o' : trigger streaming ADC data in binary form
-            //          for showing data with Matlab/Octave instead of Putty
-            case KEY_SEND_BYTE_DAT:
-                LED_Write( 1u ); 
-                for(int j=0;j<NSAMPLES_ADC;j++)
-                {
-                    // turn uint16 arrays into uint8 streams:
-                    BLE_UART_PutChar(signal_adc_1[j] >>8   );
-                    BLE_UART_PutChar(signal_adc_1[j] &0xFF ); 
-                    BLE_UART_PutChar(signal_adc_2[j] >>8   );
-                    BLE_UART_PutChar(signal_adc_2[j] &0xFF ); 
-                }
-                LED_Write( 0u );
-            break;
-                
-            case KEY_RUN_NEXT_SHOW: // run sequence and switch to next channel (just running, no output)
-                current_chan++;
-                if(current_chan>4) current_chan=0;
-                ChannelSel_Select(current_chan);
-                run_sequence(puttyIn[0]);
-                show_channel_num();
-            break;
+            // Channels: 1..4: DAC1..DAC4, 5: Signal between GPIOs 0.6 and 0.7
+            if( (puttyInBLE[CHANNEL_NUMBER]-'1' >= 0)  &&  (puttyInBLE[CHANNEL_NUMBER]-'1' <=4) )
+                ChannelSel_Select( puttyInBLE[CHANNEL_NUMBER]-'1' );
             
-            case KEY_DAC1: // Read signal from DAC 1
-                current_chan=0;
-                ChannelSel_Select(current_chan);
-                show_channel_num();
-            break;
-                
-            case KEY_DAC2: // DAC 2
-                current_chan=1;
-                ChannelSel_Select(current_chan);
-                show_channel_num();
-            break;
-                
-            case KEY_DAC3: // DAC 3
-                current_chan=2;
-                ChannelSel_Select(current_chan);
-                show_channel_num();
-            break;
-                
-            case KEY_DAC4: // DAC 4
-                current_chan=3;
-                ChannelSel_Select(current_chan);
-                show_channel_num();
-            break;
-                
-            case KEY_SIG_IN: // Read Signal from GPIO P0.7
-                current_chan=4;
-                ChannelSel_Select(current_chan);
-                show_channel_num();
-            break;
-
-            case KEY_SEND_ASCII_DAT: // Give ADC data stream in ASCII format (for display in e.g. Putty)
-                 display_results();
-            break;
-                
-            case KEY_RESET: // RESET
-                 CySoftwareReset();   
-            break;
-
-             
+            // Commands: 1: Default Sequence, 2: Switching of DAC 3 or DAC4 for even or odd numbers of runs respectively
+            if( puttyInBLE[COMMAND_NUMBER] == '1')
+            {
+                run_sequence(KEY_RUN);
+                // Don't send data before sequence has finished (ignore down ramping, i.e. last 1/3 of sequence)
+                CyDelayUs(SEQU_DURATION_US*2/3);
+            }
+            else if( puttyInBLE[COMMAND_NUMBER] == '2')
+            {
+                run_sequence(KEY_RUN_ALT);
+                // Don't send data before sequence has finished (ignore down ramping, i.e. last 1/3 of sequence)
+                CyDelayUs(SEQU_DURATION_US*2/3);
+            }
+              
+            // Packet number: 0..29 (60000 Byte -> 2000 Byte per packet)     
+            uint8 pkg_i = (uint8) (puttyInBLE[PACKET_NUMBER]  -'A');                
+            
+            LED_Write( 1u ); 
+            //for(int j=0;j<NSAMPLES_ADC;j++)
+            //for(int j=((PACKET_SIZE)*puttyInBLE[PACKET_NUMBER]); j<((PACKET_SIZE+1)*puttyInBLE[PACKET_NUMBER]); j++)
+            int pkg_size = 1000;
+            for(int j=0; j<pkg_size; j++)
+            {
+                // turn uint16 arrays into uint8 streams:
+                BLE_UART_PutChar(signal_adc_1[j+pkg_i*pkg_size] >>8   );
+                BLE_UART_PutChar(signal_adc_1[j+pkg_i*pkg_size] &0xFF ); 
+                BLE_UART_PutChar(signal_adc_2[j+pkg_i*pkg_size] >>8   );
+                BLE_UART_PutChar(signal_adc_2[j+pkg_i*pkg_size] &0xFF ); 
+            }
+            LED_Write( 0u );
         }
-
+        
     }
 } //END ble_uart_interface()
 
