@@ -50,7 +50,7 @@ import matplotlib.pyplot as plt
 
 """ 0) main settings """
 # 0.1) serial port
-com_port       = '\\\\.\\COM10'# bluetooth modul enumerate as com port
+com_port       = '\\\\.\\COM25'# bluetooth modul enumerate as com port
 baudrate       = 115200 # the value is ignored for virtual com ports
 time_out       = 1
 
@@ -74,7 +74,7 @@ nameDataFiles  = '3D_mpi_data'
 #       'C':       Packet number: full sequence goes from 0 to 29 (60000 kB divided in 2000)
 #               'C' is in ascii code starting from 'A': 0..29-> A...^ (german keyboard mapping)
 ble_command = bytearray()
-ble_command += b'Binary140'
+ble_command += b'Binary110'
 
 ble_command[-1]=65 #=ord('A')
 

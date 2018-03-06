@@ -240,8 +240,8 @@ int main(void)
     for(;;) 
     {       
         // Control interface via UART for Putty or Matlab/Octave/Python
-        uart_interface();  // for using USBUART included on Programmer Kit
-        //ble_uart_interface();
+        //uart_interface();  // for using USBUART included on Programmer Kit
+        ble_uart_interface();
         usbfs_send_data(); // for using fast USBUART routed to the onboard Micro-USB-B socket
         
     }

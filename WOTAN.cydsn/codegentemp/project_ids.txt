@@ -1,6 +1,0 @@
-D:\VM_share\MCU_PSoC_FPGA\WOTAN\WOTAN.cydsn\WOTAN.cyprj|0f1ab24c-2c7d-46d7-ba18-9143ff087003
-D:\Program Files (x86)\Cypress\PSoC Creator\4.1\PSoC Creator\psoc\content\default\CyAnnotationLibrary\CyAnnotationLibrary.cylib\CyAnnotationLibrary.cyprj|f391dcd8-4d8e-4338-ba3a-7f14b7a1ab9f
-C:\Users\User\Documents\PSoC Creator\4.1\Downloads ( 4.1).cylib\Downloads ( 4.1).cyprj|5ec77fa7-66c4-4485-a6cb-b626e94ef275
-D:\Program Files (x86)\Cypress\PSoC Creator\4.1\PSoC Creator\psoc\content\cycomponentlibraryupdates\CyComponentLibraryUpdates.cylib\CyComponentLibraryUpdates.cyprj|4bfa7ee0-5e8a-44eb-a3d8-352e229efd06
-D:\Program Files (x86)\Cypress\PSoC Creator\4.1\PSoC Creator\psoc\content\cycomponentlibrary\CyComponentLibrary.cylib\CyComponentLibrary.cyprj|3602f7c4-451e-4e91-8feb-b1a450406a90
-D:\Program Files (x86)\Cypress\PSoC Creator\4.1\PSoC Creator\psoc\content\cyprimitives\CyPrimitives.cylib\CyPrimitives.cyprj|80f6261e-ca86-4df8-83bd-5ef3dd8bdfad
