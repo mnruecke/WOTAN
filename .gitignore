@@ -1,13 +1,19 @@
 # Generated code files
-WOTAN.cydsn/codegentemp/
-WOTAN.cydsn/Generated_Source/
-WOTAN.cydsn/CortexM3/
+*.cydsn/codegentemp/
+*.cydsn/Generated_Source/
+*.cydsn/CortexM3/
 
 # Log and auxilliary files
 *.log
-WOTAN.cydsn/BUILD.log
-WOTAN.cydsn/Export/PSoCCreatorExportIDE.xml
-WOTAN.cydsn/GENERATE_API.log
-WOTAN.cydsn/WOTAN.cyfit
-WOTAN.cydsn/WOTAN.rpt
-WOTAN.cydsn/WOTAN_timing.html
+*.cywrk.User
+*.cywrk.marti
+*.cydsn/*.cycdx
+*.cydsn/*.svd
+*.cydsn/*.cyprj.User
+*.cydsn/*.cyprj.marti
+*.cydsn/BUILD.log
+*.cydsn/Export/PSoCCreatorExportIDE.xml
+*.cydsn/GENERATE_API.log
+*.cydsn/*.cyfit
+*.cydsn/*.rpt
+*.cydsn/*_timing.html
