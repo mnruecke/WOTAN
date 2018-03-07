@@ -21,6 +21,12 @@
  * ========================================
  */
 
+
+// THIS VERSION NEEDS AN XTAL TO RUN!
+//  or change  in "Design Wide Resources - Clocks" XTAL to IMO
+//  (i.e. the oscillator integrated on the chip)
+
+
 #include "project.h"
 #include <stdio.h>
 #include <string.h>
