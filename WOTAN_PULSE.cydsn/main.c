@@ -24,14 +24,16 @@
 #include <stdio.h>
 
 #define     ON           0u
+#define     OFF          1u
    
 #define     SEQUENCE_RUN    0u
 #define     SEQUENCE_HALT   1u
 #define     START           0u
 #define     STOP            1u
 
+
 // Defines for receive chain
-#define  NSAMPLES_ADC        1000
+#define  NSAMPLES_ADC        100
 #define     N_TDS_ADC          20
 
 
@@ -66,6 +68,7 @@ CY_ISR_PROTO( isr_run );
 
 uint8 count_of_runs=0; 
 char  sms[80];
+char  bleIn;
 
 // Two adc buffers 
 uint16 signal_adc_1[NSAMPLES_ADC]; 
@@ -88,9 +91,10 @@ int main(void)
     isr_ADC_2_StartEx( isr_ADC_2_done );
     isr_RUN_StartEx(   isr_run );
     
-    PWM_2_Start();
-    
+    PWM_ClockSync_Start();  
     Opamp_1_Start();
+    Dac_Ref_Start();
+    GainMux_Start();
     
     // Configure DMA channels between ADCs and memory
     dma_adc_1_init();
@@ -110,7 +114,43 @@ int main(void)
     {
         /* Pulse sequence control
            BLE trigger overwrites Manual trigger and vice versa */
-
+        if( UART_BLE_GetRxBufferSize() > 0)
+        {
+            bleIn =  UART_BLE_GetChar();
+            if( bleIn == 's' ) // "Single Shot" -> sends binary data
+            {
+                BLE_Trigger_Write(START);
+                BLE_Trigger_Write(STOP);
+            }
+            if( bleIn == 'c' ) // "Continuously" -> sends binary data
+            {
+                BLE_Trigger_Write(START);
+            }
+            if( bleIn == 'h' ) // "Halt"
+            {
+                BLE_Trigger_Write(STOP);
+            }
+            if( bleIn == 'd' ) // "Debug" -> run once and send data in ASCII
+            {
+                BLE_Trigger_Write(START);
+                BLE_Trigger_Write(STOP);
+            }
+            if( bleIn == '1' ) // Gain -> x1/10
+            {
+                GainMux_Select( 2u );
+                bleIn = 0;
+            }
+            if( bleIn == '2' ) // Gain -> x1
+            {
+                GainMux_Select( 1u );
+                bleIn = 0;
+            }
+            if( bleIn == '3' ) // Gain -> x10
+            {
+                GainMux_Select( 0u );
+                bleIn = 0;
+            }
+        }
 
     }
 }
@@ -264,52 +304,55 @@ CY_ISR( isr_ADC_1_done )
 { 
     // Stop ADC clock
     pwmSamp_Write( STOP );
-    // Reset DMA channels
+    
+    // Reset DMA channels for next run
     dma_adc_1_init();
     dma_adc_2_init();
     count_of_runs++;   
-    
-//    //DEBUG
-//    CyDelay(10);
-//    sprintf(sms, "ADC 1 done \n\r");
-//    UART_BLE_PutString( sms );
 }
 
 CY_ISR( isr_ADC_2_done )
 {   
     // Send data
-    for(int j=0; j<NSAMPLES_ADC; j++)
+    if( bleIn != 'd' )
     {
-        // turn uint16 arrays into uint8 streams:
-        UART_BLE_PutChar(signal_adc_1[j] >>8   );
-        UART_BLE_PutChar(signal_adc_1[j] &0xFF ); 
-        UART_BLE_PutChar(signal_adc_2[j] >>8   );
-        UART_BLE_PutChar(signal_adc_2[j] &0xFF ); 
+        // Send data in binary form (16 bit big endian)
+        for(int j=0; j<NSAMPLES_ADC; j++)
+        {
+            // turn uint16 arrays into uint8 streams:
+            UART_BLE_PutChar(signal_adc_1[j] >>8   );
+            UART_BLE_PutChar(signal_adc_1[j] &0xFF ); 
+            UART_BLE_PutChar(signal_adc_2[j] >>8   );
+            UART_BLE_PutChar(signal_adc_2[j] &0xFF ); 
+        }
     }
-   
-//    //DEBUG
-//    CyDelay(10);
-//    sprintf(sms, "ADC 2 done \n\r");
-//    UART_BLE_PutString( sms );
-//    
-//    for(int i=0; i<100; i++)
-//    {
-//        sprintf(sms, "ADC 1, sample %4d: %6d \n\r", i, signal_adc_1[i]);
-//        UART_BLE_PutString( sms );
-//        sprintf(sms, "ADC 2, sample %4d: %6d \n\r", i, signal_adc_2[i]);
-//        UART_BLE_PutString( sms );
-//    }
+    else
+    {
+        // Send data as commented ascii strings for debugging
+        for(int i=0; i<100; i++)
+        {
+            sprintf(sms, "ADC 1, sample %4d: %6d \n\r", i, signal_adc_1[i]);
+            UART_BLE_PutString( sms );
+            sprintf(sms, "ADC 2, sample %4d: %6d \n\r", i, signal_adc_2[i]);
+            UART_BLE_PutString( sms );
+            
+            // interrupt data stream via BLE
+            if( UART_BLE_GetRxBufferSize() ) 
+            {
+                UART_BLE_ClearRxBuffer();// stop and disregard input
+                break;
+            }
+        }
+        
+        sprintf(sms, "\n\rCount of runs after reset: %4d\n\r", count_of_runs-1);
+        UART_BLE_PutString( sms );
+    }
 }
 
 CY_ISR( isr_run )
 {
     // Start ADC clock
     pwmSamp_Write( START );
-    
-//    //DEBUG
-//    sprintf(sms, "Start run %4d\n\r", count_of_runs);
-//    UART_BLE_PutString( sms );
-
 }
 
 /* [] END OF FILE */
