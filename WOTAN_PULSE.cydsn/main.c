@@ -33,7 +33,7 @@
 
 
 // Defines for receive chain
-#define  NSAMPLES_ADC        100
+#define  NSAMPLES_ADC         1000
 #define     N_TDS_ADC          20
 
 
@@ -92,9 +92,6 @@ int main(void)
     isr_RUN_StartEx(   isr_run );
     
     PWM_ClockSync_Start();  
-    Opamp_1_Start();
-    Dac_Ref_Start();
-    GainMux_Start();
     
     // Configure DMA channels between ADCs and memory
     dma_adc_1_init();
@@ -120,7 +117,6 @@ int main(void)
             if( bleIn == 's' ) // "Single Shot" -> sends binary data
             {
                 BLE_Trigger_Write(START);
-                BLE_Trigger_Write(STOP);
             }
             if( bleIn == 'c' ) // "Continuously" -> sends binary data
             {
@@ -133,23 +129,33 @@ int main(void)
             if( bleIn == 'd' ) // "Debug" -> run once and send data in ASCII
             {
                 BLE_Trigger_Write(START);
-                BLE_Trigger_Write(STOP);
             }
-            if( bleIn == '1' ) // Gain -> x1/10
+            if( bleIn == '1' ) // Puls: 20us
             {
-                GainMux_Select( 2u );
+                PWM_1_WriteCompare(49999u);
                 bleIn = 0;
             }
-            if( bleIn == '2' ) // Gain -> x1
+            if( bleIn == '2' ) // Puls: 40us
             {
-                GainMux_Select( 1u );
+                PWM_1_WriteCompare(49998u);
                 bleIn = 0;
             }
-            if( bleIn == '3' ) // Gain -> x10
+            if( bleIn == '3' ) // Puls: 100us
             {
-                GainMux_Select( 0u );
+                PWM_1_WriteCompare(49995u);
                 bleIn = 0;
             }
+            if( bleIn == '4' ) // Puls: 200us
+            {
+                PWM_1_WriteCompare(49990u);
+                bleIn = 0;
+            }
+            if( bleIn == '5' ) // Puls: 500us
+            {
+                PWM_1_WriteCompare(49975u);
+                bleIn = 0;
+            }
+
         }
 
     }
@@ -302,6 +308,10 @@ void dma_adc_2_init(void)
 
 CY_ISR( isr_ADC_1_done )
 { 
+    // Deactivate puls shape pwm
+    if( (bleIn == 's') || (bleIn == 'd')) // Single shot and debug mode
+        BLE_Trigger_Write( STOP );
+    
     // Stop ADC clock
     pwmSamp_Write( STOP );
     

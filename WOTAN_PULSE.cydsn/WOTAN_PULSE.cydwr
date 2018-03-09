@@ -397,6 +397,7 @@
       <Data key="e09c92c7-ac19-4a70-b0c8-7f7e38eeec6b" value="clkADC" />
     </Group>
     <Group key="Pin">
+      <Data key="1d79ff27-44f8-45de-8e13-f25c036f9e08" value="P_2p3_Vdd" />
       <Data key="3ba7a1ed-6b35-41a6-ac51-dd07605abe08" value="SelectBaudrate" />
       <Data key="8c22c746-64e3-4715-83cf-08eb5d556106" value="BLE_Vdd" />
       <Data key="8d318d8b-cf7b-4b6b-b02c-ab1c5c49d0ba" value="Manual_Trigger" />
@@ -404,12 +405,13 @@
       <Data key="51a9f655-0069-4beb-842b-9457dbf1ac92/16a808f6-2e13-45b9-bce0-b001c8655113" value="ADC_SAR_2_Bypass" />
       <Data key="57f050e3-ea59-4f85-881f-6556dbc6c302" value="BLE_Trigger" />
       <Data key="220c2c3f-dee8-4b74-9980-fba0c2ac80c2" value="P_2p3" />
+      <Data key="477c151a-64e0-4dfe-881e-67c0a1c6b2e2" value="P_2p4_GND" />
       <Data key="4664ef6f-3f8a-40ba-a4a8-c8587c965408" value="GND" />
       <Data key="9477cf72-c3c3-4f7e-b7ab-4b752bcccba7" value="BLE_EN" />
       <Data key="528221b5-21b8-49aa-8762-50bb7141ae35" value="P_2p5" />
       <Data key="1425177d-0d0e-4468-8bcc-e638e5509a9b" value="BLE_TX" />
       <Data key="59056880-a19d-4bb0-b89d-fb29bc9ed5ff" value="P_2p4" />
-      <Data key="77715107-f8d5-47e5-a629-0fb83101ac6b" value="P_2p7" />
+      <Data key="77715107-f8d5-47e5-a629-0fb83101ac6b" value="P_2p4" />
       <Data key="cc3bcd7e-5dc0-48ea-9bf6-6aa082be1ada" value="P_2p6" />
       <Data key="d8987ba1-69a3-44d7-98bb-4c92b0580c77" value="TestSig" />
       <Data key="dfb3522d-b930-4df1-8f72-a93637091638/16a808f6-2e13-45b9-bce0-b001c8655113" value="ADC_SAR_1_Bypass" />
@@ -3505,6 +3507,11 @@
     </Group>
   </Group>
   <Group key="Pin2">
+    <Group key="1d79ff27-44f8-45de-8e13-f25c036f9e08">
+      <Group key="0">
+        <Data key="Port Format" value="2,3" />
+      </Group>
+    </Group>
     <Group key="3ba7a1ed-6b35-41a6-ac51-dd07605abe08">
       <Group key="0">
         <Data key="Port Format" value="3,0" />
@@ -3533,6 +3540,11 @@
     <Group key="220c2c3f-dee8-4b74-9980-fba0c2ac80c2">
       <Group key="0">
         <Data key="Port Format" value="2,3" />
+      </Group>
+    </Group>
+    <Group key="477c151a-64e0-4dfe-881e-67c0a1c6b2e2">
+      <Group key="0">
+        <Data key="Port Format" value="2,4" />
       </Group>
     </Group>
     <Group key="4664ef6f-3f8a-40ba-a4a8-c8587c965408">
