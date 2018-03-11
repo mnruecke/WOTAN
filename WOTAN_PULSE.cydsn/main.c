@@ -130,27 +130,27 @@ int main(void)
             {
                 BLE_Trigger_Write(START);
             }
-            if( bleIn == '1' ) // Puls: 20us
+            if( bleIn == '1' ) // Pulse: 20us
             {
                 PWM_1_WriteCompare(49999u);
                 bleIn = 0;
             }
-            if( bleIn == '2' ) // Puls: 40us
+            if( bleIn == '2' ) // Pulse: 40us
             {
                 PWM_1_WriteCompare(49998u);
                 bleIn = 0;
             }
-            if( bleIn == '3' ) // Puls: 100us
+            if( bleIn == '3' ) // Pulse: 100us
             {
                 PWM_1_WriteCompare(49995u);
                 bleIn = 0;
             }
-            if( bleIn == '4' ) // Puls: 200us
+            if( bleIn == '4' ) // Pulse: 200us
             {
                 PWM_1_WriteCompare(49990u);
                 bleIn = 0;
             }
-            if( bleIn == '5' ) // Puls: 500us
+            if( bleIn == '5' ) // Pulse: 500us
             {
                 PWM_1_WriteCompare(49975u);
                 bleIn = 0;
@@ -308,7 +308,7 @@ void dma_adc_2_init(void)
 
 CY_ISR( isr_ADC_1_done )
 { 
-    // Deactivate puls shape pwm
+    // Deactivate pulse shape pwm
     if( (bleIn == 's') || (bleIn == 'd')) // Single shot and debug mode
         BLE_Trigger_Write( STOP );
     

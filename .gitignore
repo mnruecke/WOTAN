@@ -5,15 +5,18 @@
 
 # Log and auxilliary files
 *.log
-*.cywrk.User
-*.cywrk.marti
+*.swp
+
+*.cywrk.*
 *.cydsn/*.cycdx
 *.cydsn/*.svd
-*.cydsn/*.cyprj.User
-*.cydsn/*.cyprj.marti
+*.cydsn/*.cyprj.*
 *.cydsn/BUILD.log
 *.cydsn/Export/PSoCCreatorExportIDE.xml
 *.cydsn/GENERATE_API.log
 *.cydsn/*.cyfit
 *.cydsn/*.rpt
 *.cydsn/*_timing.html
+
+# User files
+3D_mpi_data_*.txt

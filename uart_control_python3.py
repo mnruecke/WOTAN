@@ -35,8 +35,36 @@
 %   - transfer to PC takes approx. 5 sec at baudrate = 115200
 %   - the USBFS-component on PSoC 5LP allows 12.5 Mbps (i.e. 100x faster)
 %
+%
+%
+%  This script needs the 'pyserial' package:
+%    https://pythonhosted.org/pyserial/index.html
+%    ( download zip-file and install e.g. with "pip install pyserial")  
+%
+%   in addition, numpy and  matplotlib are required for visualization
+%   (often included in scientific python environments like 'anaconda',
+%   'spyder' etc.
+%
 % ========================================
 """
+
+
+
+
+""" --- Required parameters ---- """ 
+# A) check device manager to see at which port number the board enumerates
+serialPort = '\\\\.\\COM15' 
+
+# B) uncomment line with the channel that is to be observed:
+#channel = b'1'  # show output of DAC 1
+#channel = b'2'  # show output of DAC 2
+#channel = b'3'  # show output of DAC 3
+#channel = b'4'  # show output of DAC 4
+channel = b'5'  # show signal voltage between GPIO P0.6 (-) and GPIO P0.7 (+)
+""" ----------------------------- """
+
+
+
 
 import serial
 import time
@@ -49,7 +77,7 @@ import matplotlib.pyplot as plt
 
 """ 0) main settings """
 # 0.1) serial port
-com_port       = '\\\\.\\COM3'
+com_port       = serialPort
 baudrate       = 115200
 time_out       = 10
 
@@ -64,8 +92,9 @@ nameDataFiles  = '3D_mpi_data'
 
 """ END - main settings """
 
+
 # 0.4) list of commands defined in WOTAN
-p_sel_chan  = b'5' # default: '5' (measure signal between GPIO 0.6 and 0.7), '1'..'4': get DAC output 1..4 
+p_sel_chan  = channel # default: '5' (measure signal between GPIO 0.6 and 0.7), '1'..'4': get DAC output 1..4 
 p_run_sequ  = b'r'
 p_get_data  = b'o'
 p_reset     = b'e'
