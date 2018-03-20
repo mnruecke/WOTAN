@@ -33,6 +33,11 @@
 
 #include "wotan.h"
 
+int BLE_available = BLE_MODULE_FALSE; // set to BLE_MODULE_TRUE otherwise
+int BLE_baud_rate = BAUD_9600; // or BAUD_1300000 (the HC-05 module needs to be configured for 1.3Mbaud) 
+
+
+
 // ----------------------------------------------
 // Define sequence for four channels:
 struct sequenceParams { 
@@ -74,7 +79,7 @@ int main(void)
     // choose the default or maximum baudrate: the HC-05 default is 9600 Baud
     // (macro: BAUD_9600). Here it can also be configured to 1.3 MBaud
     // (macro: BAUD_1300000)
-    selectBaudRate_Write( BAUD_9600 );
+    selectBaudRate_Write( BLE_baud_rate ); // affects only the BLE module!
     
     // Sequence generation
     if( *(FLASH_CH1 ) == 0 ) // Skip sequence generation if non-empty
@@ -88,7 +93,7 @@ int main(void)
     {       
         // Control interface via UART for Putty or Matlab/Octave/Python: 
         
-        if( BLE_MODULE_FALSE ) 
+        if( BLE_available )
         {
             // Interface a): default - can't be used if BLE module is active
             // using the COM-port included on the onboard programmer

@@ -42,11 +42,11 @@ import matplotlib.pyplot as plt
 
 """ 0) main settings """
 # 0.1) serial port
-com_port       = '\\\\.\\COM14'
-baudrate       = 11520
+com_port       = '\\\\.\\COM4'
+baudrate       = 115200
 time_out       = 1
 
-bufInputSize   = 800
+bufInputSize   = 4000
 bytesPerSample = 2
 
 """ END - main settings """
@@ -57,6 +57,9 @@ try: # open and interact with serial port
     ser = serial.Serial( com_port, baudrate, timeout=time_out)
     
     # run MPI sequence on psoc
+    ser.write(b'A') # A..E -> Gain 1,4,8,16,32
+    time.sleep(0.3)
+    
     ser.write( b's' )
     time.sleep(0.001)
     

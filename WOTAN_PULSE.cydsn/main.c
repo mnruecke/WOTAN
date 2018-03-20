@@ -34,7 +34,7 @@
 
 // Defines for receive chain
 #define  NSAMPLES_ADC         1000
-#define     N_TDS_ADC          20
+#define     N_TDS_ADC         20
 
 
 /* Defines for DMA_ADC_1 */
@@ -69,6 +69,11 @@ CY_ISR_PROTO( isr_run );
 uint8 count_of_runs=0; 
 char  sms[80];
 char  bleIn;
+char  runMode = 's';
+#define SEQUENCE_LENGTH 25000 // t_sequ = 20 us * SEQUENCE_LENGTH
+#define DEFAULT_PULSE   25    // t_pulse = 20 us
+uint16 gain = 1;
+uint16 pulse = 25;
 
 // Two adc buffers 
 uint16 signal_adc_1[NSAMPLES_ADC]; 
@@ -92,6 +97,9 @@ int main(void)
     isr_RUN_StartEx(   isr_run );
     
     PWM_ClockSync_Start();  
+    Opamp_1_Start();
+    PGA_1_Start();
+    PGA_1_SetGain(PGA_1_GAIN_01);
     
     // Configure DMA channels between ADCs and memory
     dma_adc_1_init();
@@ -101,11 +109,12 @@ int main(void)
 
     // Transmit channel
     PWM_1_Start();
+    PWM_1_WritePeriod(SEQUENCE_LENGTH);
+    PWM_1_WriteCompare(SEQUENCE_LENGTH - DEFAULT_PULSE);
     CyDelay(10); // Avoid trigger after reset or power on
     clkDuty_Start();
-    
-    //DEBUG
-    WaveDAC8_1_Start();
+    clkSW_Start();
+
     
     for(;;)
     {
@@ -116,46 +125,109 @@ int main(void)
             bleIn =  UART_BLE_GetChar();
             if( bleIn == 's' ) // "Single Shot" -> sends binary data
             {
+                bleIn = 0;
+                runMode = 's';
                 BLE_Trigger_Write(START);
             }
             if( bleIn == 'c' ) // "Continuously" -> sends binary data
             {
+                bleIn = 0;
+                runMode = 'c';
                 BLE_Trigger_Write(START);
             }
             if( bleIn == 'h' ) // "Halt"
             {
+                bleIn = 0;
+                runMode = 'h';
                 BLE_Trigger_Write(STOP);
             }
             if( bleIn == 'd' ) // "Debug" -> run once and send data in ASCII
             {
+                bleIn = 0;
+                runMode = 'd';
                 BLE_Trigger_Write(START);
             }
             if( bleIn == '1' ) // Pulse: 20us
             {
-                PWM_1_WriteCompare(49999u);
+                pulse = 1;
+                PWM_1_WriteCompare( SEQUENCE_LENGTH - pulse );
                 bleIn = 0;
+            }
+            if( bleIn == 'r' ) // repeat sending current data (no new measurement)
+            {
+                // Send data in binary form (16 bit big endian)
+                for(int j=0; j<NSAMPLES_ADC; j++)
+                {
+                    // turn uint16 arrays into uint8 streams:
+                    UART_BLE_PutChar(signal_adc_1[j] >>8   );
+                    UART_BLE_PutChar(signal_adc_1[j] &0xFF ); 
+                    UART_BLE_PutChar(signal_adc_2[j] >>8   );
+                    UART_BLE_PutChar(signal_adc_2[j] &0xFF ); 
+                }
+                bleIn = 0;
+                runMode = 's';
             }
             if( bleIn == '2' ) // Pulse: 40us
             {
-                PWM_1_WriteCompare(49998u);
+                pulse = 2;
+                PWM_1_WriteCompare( SEQUENCE_LENGTH - pulse );
                 bleIn = 0;
             }
             if( bleIn == '3' ) // Pulse: 100us
             {
-                PWM_1_WriteCompare(49995u);
+                pulse = 5;
+                PWM_1_WriteCompare( SEQUENCE_LENGTH - pulse );
                 bleIn = 0;
             }
             if( bleIn == '4' ) // Pulse: 200us
             {
-                PWM_1_WriteCompare(49990u);
+                pulse = 10;
+                PWM_1_WriteCompare( SEQUENCE_LENGTH - pulse );
                 bleIn = 0;
             }
             if( bleIn == '5' ) // Pulse: 500us
             {
-                PWM_1_WriteCompare(49975u);
+                pulse = 25;
+                PWM_1_WriteCompare( SEQUENCE_LENGTH - pulse );
                 bleIn = 0;
             }
-
+            if( bleIn == 'A' ) // Gain 1
+            {
+                gain = 1;
+                PGA_1_SetGain(PGA_1_GAIN_01);
+                bleIn = 0;
+            }
+            if( bleIn == 'B' ) // Gain 4
+            {
+                gain = 4;
+                PGA_1_SetGain(PGA_1_GAIN_04);
+                bleIn = 0;
+            }
+            if( bleIn == 'C' ) // Gain 8
+            {
+                gain = 8;
+                PGA_1_SetGain(PGA_1_GAIN_08);
+                bleIn = 0;
+            }
+            if( bleIn == 'D' ) // Gain 16
+            {
+                gain = 16;
+                PGA_1_SetGain(PGA_1_GAIN_16);
+                bleIn = 0;
+            }
+            if( bleIn == 'E' ) // Gain 32
+            {
+                gain = 32;
+                PGA_1_SetGain(PGA_1_GAIN_32);
+                bleIn = 0;
+            }
+            if( bleIn == 'S' ) // Get status (two bytes for pulse and gain)
+            {
+                // Pulse length [us]
+                sprintf(sms,"P:%dG:%d", pulse*20, gain);
+                UART_BLE_PutString(sms);
+                bleIn = 0;
+            }
         }
 
     }
@@ -309,7 +381,7 @@ void dma_adc_2_init(void)
 CY_ISR( isr_ADC_1_done )
 { 
     // Deactivate pulse shape pwm
-    if( (bleIn == 's') || (bleIn == 'd')) // Single shot and debug mode
+    if( (runMode == 's') || (runMode == 'd') || (runMode == 'h')) // Single shot and debug mode
         BLE_Trigger_Write( STOP );
     
     // Stop ADC clock
@@ -323,8 +395,12 @@ CY_ISR( isr_ADC_1_done )
 
 CY_ISR( isr_ADC_2_done )
 {   
+    // Deactivate pulse shape pwm
+    if( (runMode == 's') || (runMode == 'd') || (runMode == 'h')) // Single shot and debug mode
+        BLE_Trigger_Write( STOP );   
+    
     // Send data
-    if( bleIn != 'd' )
+    if( runMode == 's' || runMode == 'c' )
     {
         // Send data in binary form (16 bit big endian)
         for(int j=0; j<NSAMPLES_ADC; j++)
@@ -336,8 +412,12 @@ CY_ISR( isr_ADC_2_done )
             UART_BLE_PutChar(signal_adc_2[j] &0xFF ); 
         }
     }
-    else
+    else if( runMode == 'd' )
     {
+        // Clear input
+        bleIn = 0;
+        runMode = 's'; // = back to default mode
+        UART_BLE_ClearRxBuffer();
         // Send data as commented ascii strings for debugging
         for(int i=0; i<100; i++)
         {

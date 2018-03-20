@@ -53,7 +53,7 @@
 
 """ --- Required parameters ---- """ 
 # A) check device manager to see at which port number the board enumerates
-serialPort = '\\\\.\\COM15' 
+serialPort = '\\\\.\\COM4' 
 
 # B) uncomment line with the channel that is to be observed:
 #channel = b'1'  # show output of DAC 1

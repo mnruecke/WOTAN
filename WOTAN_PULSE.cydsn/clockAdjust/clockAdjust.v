@@ -30,7 +30,7 @@ begin
     cnt <= cnt + accu_word;   
 end
 
-assign clk_out = (cnt[7] && ~clk_sw) || (clk_inB && clk_sw);
+assign clk_out = (cnt[7] && clk_sw) || (clk_inB && ~clk_sw);
 
 
 //`#end` -- edit above this line, do not edit this line
