@@ -1,6 +1,8 @@
 # WOTAN
 Firmware and scripts for running a control unit of a 3D MPI scanner. It is based around the PSoC 5LP mixed-signal chip from Cypress Semiconductor. The firmware was designed using Creator 4.1 for the CY8CKIT-059-kit with the CY8C5888LTI-LP097. This project started as a conference contribution for the IWMPI 2018 Hamburg. 
 
+![Image of 3D TWMPI control unit](https://github.com/mnruecke/wotan.png)
+
 ## Basic Features
 The MPI scanner control module has 4 transmit channels (4x 250 kS/s, 8 bit, up to 4 MS/s possible) and one receive channel (2 MS/s, 12 bit). Recording time: 15 ms. Data transfer over USB-to-UART with 115200 Baud. The onboard programmer allows higher transfer rates with precise clock adjustments. Using the USBFS component included on the PSoC allows up to 12.5 Mbps (micro B connector). The common HC-05 bluetooth module can also be connected to the control unit (up to 1.3 Mbps).
 
@@ -28,4 +30,4 @@ This version is therefore recommended for debugging and first tests. *WOTAN_PULS
 
 10. For using the HC-05 bluetooth module: a) connect it as indicated in the schematic in the Creator IDE and b) go into *main.c* and set the two variables *BLE_available* and *BLE_baud_rate* at the beginning to the correct values (see comments in code). 
 
-11. Have fun and push the boundaries of MPI hardware development beyond beyond
+11. Push the boundaries of MPI hardware development beyond good and evil
