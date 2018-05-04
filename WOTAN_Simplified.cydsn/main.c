@@ -22,24 +22,68 @@
  */
 
 
-//  This is a simplified version of WOTAN that can be used and tested
-//  without any external components, i.e. it uses the internal oscillator
-//  (significantly less accurate) and Voltage DACs, which don't need external
-//  resistors. It can be easly changed back to the more accurate version by 
-//   changing the oscillator type in the "design wide resources" and by
-//   replacing the voltage dac with the current dac component. The current
-//   dacs (IDAC8) allow higher sampling rates.
+// This version does not need an external crystal by default
 
 
-#include "wotan.h"
+#include "project.h"
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
 
-int BLE_available = BLE_MODULE_FALSE; // set to BLE_MODULE_TRUE otherwise
-int BLE_baud_rate = BAUD_9600; // or BAUD_1300000 (the HC-05 module needs to be configured for 1.3Mbaud) 
+#define  TRUE               1
+#define  FALSE              0
 
+#define START_CLOCK         0
+#define STOP_CLOCK          1
 
+// UART interface
+#define  UART_BUF_IN         100
+#define  UART_BUF_OUT        80
+#define  KEY_RUN             'r'
+#define  KEY_RUN_ALT         'v'
+#define  KEY_RUN_AND_SHOW    's'
+#define  KEY_RUN_NEXT_SHOW   'a'
+#define  KEY_SEND_ASCII_DAT  'd'
+#define  KEY_SEND_BYTE_DAT   'o'
+#define  KEY_SET_PARAMS      't'
+#define  KEY_RESET           'e'
+#define  KEY_DAC1            '1'
+#define  KEY_DAC2            '2'
+#define  KEY_DAC3            '3'
+#define  KEY_DAC4            '4'
+#define  KEY_SIG_IN          '5'
 
-// ----------------------------------------------
-// Define sequence for four channels:
+#define  NSAMPLES_ADC       15000               // 1 MS/s, max value: 15000
+#define  NSAMPLES_DAC       NSAMPLES_ADC/4      // 250 kS/s (make sample duration for Transmit and Receive the same)
+#define  SEQU_DURATION_US   NSAMPLES_ADC*3      // duration includes start- and end ramp
+
+#define  IGNORE_FIRST_PART  TRUE               // if FALSE: shows start ramp of sequence (default: TRUE)
+
+#define  N_TDS_ADC          20
+#define  N_TDS_DAC          3               // TD1: on ramp, TD2: sequence (each with length NSAMPLES_DAC)
+
+#define  FLASH_CH1          (const uint8 *)     0x08000  // Flash addresses for storing the DAC wave forms
+#define  FLASH_CH2          (const uint8 *)     0x10000
+#define  FLASH_CH3          (const uint8 *)     0x20000
+#define  FLASH_CH4          (const uint8 *)     0x30000 
+
+#define  CLOCK_SHIFT_CH1     0b1100   
+#define  CLOCK_SHIFT_CH2     0b0110   
+#define  CLOCK_SHIFT_CH3     0b0011   
+#define  CLOCK_SHIFT_CH4     0b1001   
+
+// Set all MPI waveform parameters
+#define NUM_CHANNELS    4
+#define CH1             0
+#define CH2             1
+#define CH3             2
+#define CH4             3
+#define FREQ_CORRECTION 1.0 // XTAL: +/- 30ppm
+#define OM_1HZ          2*M_PI/250000.0*FREQ_CORRECTION
+#define PHI_90DEG       M_PI/2.0
+#define MAX_VALUE       180 // 180 => CH1, CH2: 1.82 V-pp; CH3, Ch4: 1.78 V-pp
+#define WAVE_EXIST      MAX_VALUE/2 // token = first sample in each wave form
+
 struct sequenceParams { 
     float           om          [NUM_CHANNELS];
     float           om_mod      [NUM_CHANNELS];
@@ -60,66 +104,156 @@ twMPI_params= {{723.57*OM_1HZ,    723.57*OM_1HZ,    16823.0*OM_1HZ,    16823.0*O
                {FLASH_CH1,          FLASH_CH2,          FLASH_CH3,          FLASH_CH4}};
 
 struct sequenceParams *twMPI = &twMPI_params;
-// END sequence setup ---------------------------
-// ----------------------------------------------
 
 
-// Auxilliary flags for program control
-uint8   nextRun = FALSE; // Flag for avoiding blockage due to multiple manual triggering
-uint8   current_chan=0;  // Number of currently monitored channel (DAC 1..4 or GPIO 0.7) 
-uint8   count_of_runs=0; // Counter for avoiding multiple allocations of DMA channels
+/* Defines for DMA_DAC_1 */
+#define DMA_DAC_1_BYTES_PER_BURST 1
+#define DMA_DAC_1_REQUEST_PER_BURST 1   
+#define DMA_DAC_1_SRC_BASE (FLASH_CH1)
+#define DMA_DAC_1_DST_BASE (CYDEV_PERIPH_BASE)
 
+/* Variable declarations for DMA_DAC */
+/* Move these variable declarations to the top of the function */
+uint8 DMA_DAC_1_Chan;
+uint8 DMA_DAC_1_TD[N_TDS_DAC];
+
+/* Defines for DMA_DAC_2 */
+#define DMA_DAC_2_BYTES_PER_BURST 1
+#define DMA_DAC_2_REQUEST_PER_BURST 1
+#define DMA_DAC_2_SRC_BASE (FLASH_CH2)
+#define DMA_DAC_2_DST_BASE (CYDEV_PERIPH_BASE)
+
+/* Variable declarations for DMA_DAC_2 */
+/* Move these variable declarations to the top of the function */
+uint8 DMA_DAC_2_Chan;
+uint8 DMA_DAC_2_TD[N_TDS_DAC];
+
+/* Defines for DMA_DAC_3 */
+#define DMA_DAC_3_BYTES_PER_BURST 1
+#define DMA_DAC_3_REQUEST_PER_BURST 1
+#define DMA_DAC_3_SRC_BASE (FLASH_CH3)
+#define DMA_DAC_3_DST_BASE (CYDEV_PERIPH_BASE)
+
+/* Variable declarations for DMA_DAC_3 */
+/* Move these variable declarations to the top of the function */
+uint8 DMA_DAC_3_Chan;
+uint8 DMA_DAC_3_TD[N_TDS_DAC];
+
+/* Defines for DMA_DAC_4 */
+#define DMA_DAC_4_BYTES_PER_BURST 1
+#define DMA_DAC_4_REQUEST_PER_BURST 1
+#define DMA_DAC_4_SRC_BASE (FLASH_CH4)
+#define DMA_DAC_4_DST_BASE (CYDEV_PERIPH_BASE)
+
+/* Variable declarations for DMA_DAC */
+/* Move these variable declarations to the top of the function */
+uint8 DMA_DAC_4_Chan;
+uint8 DMA_DAC_4_TD[N_TDS_DAC];
+
+
+/* Defines for DMA_ADC_1 */
+#define DMA_ADC_1_BYTES_PER_BURST 2
+#define DMA_ADC_1_REQUEST_PER_BURST 1
+#define DMA_ADC_1_SRC_BASE (CYDEV_PERIPH_BASE)
+#define DMA_ADC_1_DST_BASE (CYDEV_SRAM_BASE)
+
+/* Variable declarations for DMA_ADC */
+/* Move these variable declarations to the top of the function */
+uint8 DMA_ADC_1_Chan;
+uint8 DMA_ADC_1_TD[N_TDS_ADC];
+
+/* Defines for DMA_ADC_2 */
+#define DMA_ADC_2_BYTES_PER_BURST 2
+#define DMA_ADC_2_REQUEST_PER_BURST 1
+#define DMA_ADC_2_SRC_BASE (CYDEV_PERIPH_BASE)
+#define DMA_ADC_2_DST_BASE (CYDEV_SRAM_BASE)
+
+/* Variable declarations for DMA_ADC */
+/* Move these variable declarations to the top of the function */
+uint8 DMA_ADC_2_Chan;
+uint8 DMA_ADC_2_TD[N_TDS_ADC];
+
+// auxilliary variables
+char    sms         [UART_BUF_OUT];
+char    puttyIn     [UART_BUF_IN];
+int     rxBuf;
+int     rxBufBLE;
+uint8   run_count_DAC_1=0;
+uint8   nextRun = FALSE;
+
+// USBUART (USBFS)
+#define USBUART_BUFFER_SIZE (64u)
+#define USBFS_DEVICE    (0u)
+#define USBFS_TX_SIZE   60
+uint16 count;
+uint8 buffer[USBFS_TX_SIZE];
+uint8 data_tx[4];
+
+// Bluetooth (command: 'BinaryABC' with A: packet number (1..30), B: command (1..not-implemented-yet), C: channel number (1..5)
+#define DATA_ORDER          "Binary"
+#define COMMAND_NUMBER      strlen(DATA_ORDER)
+#define CHANNEL_NUMBER      strlen(DATA_ORDER)+1
+#define PACKET_NUMBER       strlen(DATA_ORDER)+2
+#define PACKET_SIZE         500
+#define BYTES_PER_PACKET    4
+char    puttyInBLE          [UART_BUF_IN];
+
+
+// Two adc buffers 
+uint16 signal_adc_1[NSAMPLES_ADC]; 
+uint16 signal_adc_2[NSAMPLES_ADC];
+
+void init_components(void);
+void show_default_message(void);
+void show_channel_num(void);
+void set_sequence_params(uint8 *);
+void generate_sequence(void);
+void run_sequence(char);
+void display_results(void);
+void uart_interface(void);
+void ble_uart_interface(void);
+void usbfs_send_data(void);
+void dma_dac_1_init(void);
+void dma_dac_2_init(void);
+void dma_dac_3_init(void);
+void dma_dac_4_init(void);
+void dma_adc_1_init(void);
+void dma_adc_2_init(void);
+CY_ISR_PROTO( isr_triggerIn );
+CY_ISR_PROTO( isr_DAC_1_done );
+CY_ISR_PROTO( isr_DAC_2_done );
+CY_ISR_PROTO( isr_DAC_3_done );
+CY_ISR_PROTO( isr_DAC_4_done );
+CY_ISR_PROTO( isr_ADC_1_done );
+CY_ISR_PROTO( isr_ADC_2_done );
+
+
+uint8 current_chan=0;
+uint8 count_of_runs=0;
+uint8 isDAC1Busy = FALSE;
 
 int main(void)
 {
     // Initialization routines
+    CyGlobalIntEnable;
     init_components();
-    
-    // If a HC-05 bluetooth module (for example) is connected, this allows to  
-    // choose the default or maximum baudrate: the HC-05 default is 9600 Baud
-    // (macro: BAUD_9600). Here it can also be configured to 1.3 MBaud
-    // (macro: BAUD_1300000)
-    selectBaudRate_Write( BLE_baud_rate ); // affects only the BLE module!
-    
-    // Sequence generation
     if( *(FLASH_CH1 ) == 0 ) // Skip sequence generation if non-empty
         generate_sequence(); // (calculation takes ~5 seconds on PSoC)
-        
-    // Start message for uart terminal:
-    // shows available commands after reseting or powercycling the device
     show_default_message();
       
     for(;;) 
     {       
-        // Control interface via UART for Putty or Matlab/Octave/Python: 
-        
-        if( BLE_available )
-        {
-            // Interface a): default - can't be used if BLE module is active
-            // using the COM-port included on the onboard programmer
-            uart_interface();  
-        }
-        else 
-        {
-            // Interface b) connect a bluetooth modem to P1.6 (-> to RX) and P1.7 (-> to TX)
-            ble_uart_interface();
-        }
-        
-        // Interface c) Fullspeed USB 
+        // Control interface via UART for Putty or Matlab/Octave/Python
+        uart_interface();  // for using USBUART included on Programmer Kit
+        //ble_uart_interface();
         usbfs_send_data(); // for using fast USBUART routed to the onboard Micro-USB-B socket
         
     }
-}/* END MAIN() ******************************************************************/
+}/* END MAIN() ***********************************/
 
 
-
-
-// ---------------------- CUSTOM FUNCTIONS --------------------------------------
 void init_components(void)
 {
-    // Enable global interupts
-    CyGlobalIntEnable;
-    
     // ADDA Clock
     pwmSAMPLING_Start();
     
@@ -274,8 +408,11 @@ void usbfs_send_data(void)
                 // 3) reset firmware 
                 if ( buffer[0] == KEY_RESET )
                     CySoftwareReset(); // If Putty is used: this ends the session!
+                // 4) set new parameters
+                if ( buffer[0] == 'p' )
+                    set_sequence_params(buffer);
                   
-                // 4) Get the binary data from the two uint16 ADC buffers
+                // 5) Get the binary data from the two uint16 ADC buffers
                 if ( buffer[0] == KEY_SEND_BYTE_DAT )
                 {
                     LED_Write(1u);
@@ -304,7 +441,7 @@ void usbfs_send_data(void)
     }
 } //usbfs_send_data()
 
-void set_sequence_params(void)
+void set_sequence_params(uint8 * params)
 {
     // clear token
     puttyIn[0]=0;
@@ -320,7 +457,10 @@ void set_sequence_params(void)
         //phi
         //phi_mod
         //amp
-        twMPI->amp[0] = 50.0;// ((float) (100*(puttyIn[3]-'0') + 10*(puttyIn[4]-'0') * 1*(puttyIn[5]-'0')));
+        twMPI->amp[0] = params[8];// ((float) (100*(puttyIn[3]-'0') + 10*(puttyIn[4]-'0') * 1*(puttyIn[5]-'0')));
+        twMPI->amp[1] = params[9];// ((float) (100*(puttyIn[3]-'0') + 10*(puttyIn[4]-'0') * 1*(puttyIn[5]-'0')));
+        twMPI->amp[2] = params[10];// ((float) (100*(puttyIn[3]-'0') + 10*(puttyIn[4]-'0') * 1*(puttyIn[5]-'0')));
+        twMPI->amp[3] = params[11];// ((float) (100*(puttyIn[3]-'0') + 10*(puttyIn[4]-'0') * 1*(puttyIn[5]-'0')));
         //off
     }
     generate_sequence();
@@ -430,7 +570,7 @@ void uart_interface(void)
         // Set new sequence parameters via uart
         if( puttyIn[0] == 't' && puttyIn[1] == 't' && puttyIn[2] == 't')
         {
-            set_sequence_params();
+            //set_sequence_params();
         }   
         
         // 3) Putty user interface

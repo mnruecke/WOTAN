@@ -49,7 +49,7 @@ import timeit
 """ 0) main settings """
 # 0.1) serial port
 #      this script targets the faster USBUART routed to the Micro-USB-B socket
-com_port         = '\\\\.\\COM8'
+com_port         = '\\\\.\\COM20'
 baudrate         = 9600 # USBFS component ignores this parameter
 time_out         = 1 # [s]; this script should retrieve the 60 kB data in << 1s
 
@@ -67,7 +67,7 @@ nameDataFiles    = '3D_mpi_data'  # save data to files with continuous numbering
 """ END - main settings """
 
 # 0.4) list of commands defined in WOTAN
-p_sel_chan  = b'5' # default: '5' (measure signal between GPIO 0.6 and 0.7), '1'..'4': get DAC output 1..4 
+p_sel_chan  = b'4' # default: '5' (measure signal between GPIO 0.6 and 0.7), '1'..'4': get DAC output 1..4 
 p_run_sequ  = b'r'
 p_get_data  = b'o'
 p_reset     = b'e'

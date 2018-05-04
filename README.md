@@ -8,8 +8,8 @@ The MPI scanner control module has 4 transmit channels (4x 250 kS/s, 8 bit, up t
 1. For programming the module, Creator 4.1 or higher is necessary, which can be downloaded for free from Cypress Semiconductor (www.cypress.com).
 
 2. Opening the workspace "WOTAN" shows three projects.
-*WOTAN* is the version used for the TWMPI scanner.
-*WOTAN\_Simplified* contains basically the same code but is more readable and can be used without any external components (at the cost of accuracy and performance).
+*WOTAN* is the version used for the TWMPI scanner. It requires a few external components to run.
+*WOTAN\_Simplified* contains basically the same code but can be used without any external components (at the cost of accuracy and performance).
 This version is therefore recommended for debugging and first tests. *WOTAN_PULSE* is a version that contains only the receive chain and a trigger output.
 
 3. For writing the firmware to the chip connect the module to the USB port, select *WOTAN\_Simplified* as active project (right mouse click) and press CTRL-F5 for compiling and programming. 
