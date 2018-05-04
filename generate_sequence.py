@@ -108,7 +108,6 @@ plt.show()
 
 """ write sequence """
 
-
 # opening serial connection
 ser = serial.Serial( com_port, baudrate, timeout=time_out)
 start = timeit.default_timer()
@@ -142,7 +141,7 @@ for channel in range(num_channels):
 
         ser.write(header_bytes + data_bytes)
 
-    
+ser.close()
 
 
 
