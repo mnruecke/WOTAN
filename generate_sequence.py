@@ -49,12 +49,12 @@ import timeit
 """ 0) main settings """
 # 0.1) serial port
 #      this script targets the faster USBUART routed to the Micro-USB-B socket
-com_port         = '\\\\.\\COM8'
-baudrate         = 9600 # USBFS component ignores this parameter
+com_port         = '\\\\.\\COM24'
+baudrate         = 1 # USBFS component ignores this parameter
 time_out         = 1 # [s]; this script should retrieve the 60 kB data in << 1s
 
 # 0.2) channel settings
-num_channels = 4            # number of channels
+num_channels = 1            # number of channels
 nsamples_ramp_up = 3750     # number of steps for the ramp up sequence
 nsamples_sequence = 3750    # number of steps for the actual sequence
 nsamples_ramp_down = 3750   # number of steps for the ramp up sequence
@@ -113,41 +113,38 @@ plt.show()
 """ write sequence """
 
 # opening serial connection
-ser = serial.Serial( com_port, baudrate, timeout=time_out)
-start = timeit.default_timer()
-
-
-# calculating the numbe of packages
-num_packages = int (nsamples_total / len_data) # number of full packages
-if nsamples_total%len_data != 0:               # add a partially filled package
-    num_packages += 1
+try:
+    ser = serial.Serial( com_port, baudrate, timeout=time_out)
+    start = timeit.default_timer()
     
     
-for channel in range(num_channels):
-    for package in range(num_packages):
+    # calculating the numbe of packages
+    num_packages = int (np.ceil(nsamples_total / len_data)) # number of full packages    
         
-        #header
-        header = np.zeros(len_header,  dtype=np.uint8)
-        header[0] = ord('p')                    # 'p' for programming mode
-        header[1] = channel                     # channel number
-        header[2] = package >> 8                # package number HSB
-        header[3] = package & 0xF               # package number LSB
-        
-        header_bytes = bytes(header)    
-        
-        #data
-        data = values[channel][len_data*package:len_data*(package+1)]
-        #last package
-        if data.size != 32:
-            data = np.append(data, np.zeros(32-data.size,dtype=np.uint8))
+    for channel in range(num_channels):
+        for package in range(num_packages):
             
-        #data_bytes = bytes(data)
+            #header
+            header = np.zeros(len_header,  dtype=np.uint8)
+            header[0] = ord('r')                    # 'p' for programming mode
+            header[1] = channel                     # channel number
+            header[2] = package >> 8                # package number HSB
+            header[3] = package & 0xFF               # package number LSB
+            
+            header_bytes = bytes(header)    
+            
+            #data
+            data = values[channel][len_data*package:len_data*(package+1)]
+            #last package
+            if data.size != 32:
+                data = np.append(data, np.zeros(32-data.size,dtype=np.uint8))
+                
+            data_bytes = bytes(data)
+    
+            ser.write(header_bytes + data_bytes)
+            print("Channel:  " + str(channel) + "   Package:  " + str(package))
 
-        #ser.write(header_bytes + data_bytes)
-
-ser.close()
-#
-#
-#
+finally:
+    ser.close()
 
 
