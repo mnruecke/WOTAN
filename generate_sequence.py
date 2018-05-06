@@ -54,7 +54,8 @@ baudrate         = 1 # USBFS component ignores this parameter
 time_out         = 1 # [s]; this script should retrieve the 60 kB data in << 1s
 
 # 0.2) channel settings
-num_channels = 1            # number of channels
+num_channels = 4            # number of channels
+write_channels = [3]
 nsamples_ramp_up = 3750     # number of steps for the ramp up sequence
 nsamples_sequence = 3750    # number of steps for the actual sequence
 nsamples_ramp_down = 3750   # number of steps for the ramp up sequence
@@ -74,11 +75,11 @@ len_data = 32
 
 
 """ generates sequence """
-f = frequency_scale*np.asarray([700,700,16000,17000])         # frequency in Hz
+f = frequency_scale*np.asarray([17000,17020,600,100])         # frequency in Hz
 f_mod = frequency_scale*np.asarray([0.0,0,0,0])      # in Hz
 phi = np.asarray([0,90,0,0])         # in degree
 phi_mod = np.asarray([90,90,90,90])     # in degree
-amp = np.asarray([0.5 * max_value, 0.5 * max_value, 0.5 * max_value, 0.5 * max_value])        
+amp = np.asarray([0.47 * max_value, 0.47 * max_value, 0.47 * max_value, 0.47 * max_value])        
 off = np.asarray([0.5 * max_value, 0.5 * max_value, 0.5 * max_value, 0.5 * max_value])
 
 
@@ -121,15 +122,17 @@ try:
     # calculating the numbe of packages
     num_packages = int (np.ceil(nsamples_total / len_data)) # number of full packages    
         
-    for channel in range(num_channels):
+    for channel in write_channels:
         for package in range(num_packages):
             
             #header
             header = np.zeros(len_header,  dtype=np.uint8)
-            header[0] = ord('r')                    # 'p' for programming mode
+            header[0] = ord('p')                    # 'p' for programming mode
             header[1] = channel                     # channel number
-            header[2] = package >> 8                # package number HSB
+            header[2] = package >> 8                # package number MSB
             header[3] = package & 0xFF               # package number LSB
+            header[4] = num_packages >> 8
+            header[5] = num_packages & 0xFF
             
             header_bytes = bytes(header)    
             
@@ -142,7 +145,11 @@ try:
             data_bytes = bytes(data)
     
             ser.write(header_bytes + data_bytes)
-            print("Channel:  " + str(channel) + "   Package:  " + str(package))
+            
+            """ Debugging code """
+            print("Channel:  " + str(channel) + "   Package:  " + str(package))            
+#            print(data_bytes)
+#            print(ser.read(32))
 
 finally:
     ser.close()

@@ -207,6 +207,7 @@ void init_components(void);
 void show_default_message(void);
 void show_channel_num(void);
 void set_sequence_params(uint8 *);
+void set_wave_form(uint8 *);
 void generate_sequence(void);
 void run_sequence(char);
 void display_results(void);
@@ -240,6 +241,11 @@ int main(void)
     if( *(FLASH_CH1 ) == 0 ) // Skip sequence generation if non-empty
         generate_sequence(); // (calculation takes ~5 seconds on PSoC)
     show_default_message();
+    
+    // Avoid errorness serial input due to initial switching noise:
+    CyDelay(500);
+    UART_1_ClearRxBuffer();
+    BLE_UART_ClearRxBuffer();
       
     for(;;) 
     {       
@@ -362,6 +368,13 @@ void display_results(void)
 
 void usbfs_send_data(void)
 {
+    uint size_of_segment = 32;
+    uint number_of_packages;
+    uint package_number;
+    uint number_of_samples;
+    uint channel_number;
+    char * wave_segment_ptr;
+    
      /* Host can send double SET_INTERFACE request. */
     if (0u != USBUART_IsConfigurationChanged())
     {
@@ -384,11 +397,7 @@ void usbfs_send_data(void)
             count = USBUART_GetAll(buffer);
 
             if (0u != count)
-            {
-                LED_Write(1u);
-                CyDelay(50);
-                LED_Write(0u);
-                
+            {   
                 /* Avoid interference with the UART_1 component */
                 UART_1_ClearRxBuffer();
                 UART_1_ClearTxBuffer();
@@ -410,7 +419,21 @@ void usbfs_send_data(void)
                     CySoftwareReset(); // If Putty is used: this ends the session!
                 // 4) set new parameters
                 if ( buffer[0] == 'p' )
-                    set_sequence_params(buffer);
+                {
+                    // get parameters:
+                    number_of_packages  = (256*buffer[4]+buffer[5]);
+                    package_number      = (256*buffer[2]+buffer[3]);
+                    number_of_samples   = number_of_packages*size_of_segment;
+                    channel_number      = buffer[1];
+                    
+                    // write wave into flash memory:
+                    wave_segment_ptr    = ((char *) signal_adc_1) + size_of_segment * package_number;
+                    strcpy(  wave_segment_ptr, (char *) &buffer[8] );                  
+                    if( package_number == (number_of_packages-1) )
+                    {
+                        FLASH_Write( (uint8*)signal_adc_1, twMPI->flash_ptr[channel_number], number_of_samples);
+                    }
+                }
                   
                 // 5) Get the binary data from the two uint16 ADC buffers
                 if ( buffer[0] == KEY_SEND_BYTE_DAT )
@@ -465,6 +488,11 @@ void set_sequence_params(uint8 * params)
     }
     generate_sequence();
 }
+
+void set_wave_form(uint8* wave)
+{
+    
+}   
 
 void generate_sequence(void)
 {
