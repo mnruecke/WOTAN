@@ -53,6 +53,12 @@
 #define  KEY_DAC4            '4'
 #define  KEY_SIG_IN          '5'
 
+#define  KEY_WRITE_SEQUENCE  'p'
+#define  KEY_TRIGGER_OUT     'x'
+#define  KEY_TRIGGER_IN      'y'
+#define  TRIGGER_OUT_TRUE    1
+#define  TRIGGER_OUT_FALSE   0
+
 #define  NSAMPLES_ADC       15000               // 1 MS/s, max value: 15000
 #define  NSAMPLES_DAC       NSAMPLES_ADC/4      // 250 kS/s (make sample duration for Transmit and Receive the same)
 #define  SEQU_DURATION_US   NSAMPLES_ADC*3      // duration includes start- and end ramp
@@ -368,6 +374,7 @@ void display_results(void)
 
 void usbfs_send_data(void)
 {
+    uint size_of_header  = 8;
     uint size_of_segment = 32;
     uint number_of_packages;
     uint package_number;
@@ -418,7 +425,7 @@ void usbfs_send_data(void)
                 if ( buffer[0] == KEY_RESET )
                     CySoftwareReset(); // If Putty is used: this ends the session!
                 // 4) set new parameters
-                if ( buffer[0] == 'p' )
+                if ( buffer[0] == KEY_WRITE_SEQUENCE )
                 {
                     // get parameters:
                     number_of_packages  = (256*buffer[4]+buffer[5]);
@@ -428,14 +435,26 @@ void usbfs_send_data(void)
                     
                     // write wave into flash memory:
                     wave_segment_ptr    = ((char *) signal_adc_1) + size_of_segment * package_number;
-                    strcpy(  wave_segment_ptr, (char *) &buffer[8] );                  
+                    strcpy(  wave_segment_ptr, (char *) &buffer[size_of_header] );                  
                     if( package_number == (number_of_packages-1) )
                     {
                         FLASH_Write( (uint8*)signal_adc_1, twMPI->flash_ptr[channel_number], number_of_samples);
                     }
                 }
-                  
-                // 5) Get the binary data from the two uint16 ADC buffers
+                // 5) Use gpio P3[0] as trigger output
+                if ( buffer[0] == KEY_TRIGGER_OUT )             
+                { 
+                    CompTrigger_Stop();
+                    enableTrigOut_Write( TRIGGER_OUT_TRUE );
+                }
+                // 6) Use gpio P3[0] as trigger input
+                if ( buffer[0] == KEY_TRIGGER_IN )             
+                { 
+                    CompTrigger_Start();
+                    enableTrigOut_Write( TRIGGER_OUT_FALSE );
+                }     
+                
+                // 7) Get the binary data from the two uint16 ADC buffers
                 if ( buffer[0] == KEY_SEND_BYTE_DAT )
                 {
                     LED_Write(1u);

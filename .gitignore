@@ -18,5 +18,7 @@
 *.cydsn/*.rpt
 *.cydsn/*_timing.html
 
+Backup/*.zip
+
 # User files
 3D_mpi_data_*.txt

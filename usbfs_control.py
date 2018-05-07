@@ -49,7 +49,7 @@ import timeit
 """ 0) main settings """
 # 0.1) serial port
 #      this script targets the faster USBUART routed to the Micro-USB-B socket
-com_port         = '\\\\.\\COM20'
+com_port         = '\\\\.\\COM8'
 baudrate         = 9600 # USBFS component ignores this parameter
 time_out         = 1 # [s]; this script should retrieve the 60 kB data in << 1s
 
@@ -67,17 +67,19 @@ nameDataFiles    = '3D_mpi_data'  # save data to files with continuous numbering
 """ END - main settings """
 
 # 0.4) list of commands defined in WOTAN
-p_sel_chan  = b'4' # default: '5' (measure signal between GPIO 0.6 and 0.7), '1'..'4': get DAC output 1..4 
+p_sel_chan  = b'5' # default: '5' (measure signal between GPIO 0.6 and 0.7), '1'..'4': get DAC output 1..4 
 p_run_sequ  = b'r'
 p_get_data  = b'o'
-p_reset     = b'e'
+p_trig_dir  = b'x' # "Trigger direction", Values: 'x', 'y', 'x' use P3.0 as trigger output, 'y': use P3.0 as Trigger input
 
 # 1) start measurement on PSoC and get data
 try: # open and interact with serial port 
     ser = serial.Serial( com_port, baudrate, timeout=time_out)
     
     start = timeit.default_timer()
-#   run MPI sequence on psoc
+#   run MPI sequence on pso
+    ser.write( p_trig_dir )
+    time.sleep(0.001)
     ser.write( p_sel_chan )
     time.sleep(0.001)
     ser.write( p_run_sequ )
