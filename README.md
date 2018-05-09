@@ -41,17 +41,17 @@ The PSoc can be controlled using the Python script *usbfs_control.py*.
 ## generate_sequency.py
 Python script that allows to send an arbitrary sequence to the PSoc with Firmware *WOTAN\_simplified* via the fast USBFS interface, so no programmer is needed to change the sequence.
 The *com_port* variable must be adapted to the Port of the PSoC on the computer which can be found in Windows under *Device Manager*.
-It is possible to generate a sequence for each output channel in the form
+It is possible to generate a sequence for each output channel in the form  
 
 amp * sin(2pi * f + phi) * sin(2pi * f_mod + phi_mod) + off
 
 where
-*amp* is the amplitude
-*f* is the main frequency of the sequence
-*phi* is the phase of the sequence
-*f_mod* is the frequency of the modulated sin function
-*phi_mod* is the phase of the modulated sin function
-*off* is the offset
+*amp* is the amplitude  
+*f* is the main frequency of the sequence  
+*phi* is the phase of the sequence  
+*f_mod* is the frequency of the modulated sin function  
+*phi_mod* is the phase of the modulated sin function  
+*off* is the offset  
 
 The sequence starts with a ramp up and ends with a ramp down interval
 
