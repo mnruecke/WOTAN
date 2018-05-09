@@ -37,8 +37,23 @@ In *WOTAN\_Simplified* a sequence can be generated and transfered to the PSoC vi
 Firmware for the PSoc Chip that allows to receive an arbitrary sequence via the USBFS interface (see *generate_sequence.py*). 
 The sequence is then stored in the Flash. On first startup after loading the firmware to PSoC it generates an default sequence.
 The PSoc can be controlled using the Python script *usbfs_control.py*.
-## generate sequency
-Python script that allows to send an arbitrary sequence to the PSoc with Firmware *WOTAN\_simplified*
-The *com_port* variable must be adapted
-## usbfs.py
-Python script that
+
+## generate_sequency.py
+Python script that allows to send an arbitrary sequence to the PSoc with Firmware *WOTAN\_simplified* via the fast USBFS interface, so no programmer is needed to change the sequence.
+The *com_port* variable must be adapted to the Port of the PSoC on the computer which can be found in Windows under *Device Manager*.
+It is possible to generate a sequence for each output channel in the form
+amp * sin(2pi * f + phi) * sin(2pi * f_mod + phi_mod) + off
+
+where
+*amp* is the amplitude
+*f* is the main frequency of the sequence
+*phi* is the phase of the sequence
+*f_mod* is the frequency of the modulated sin function
+*phi_mod* is the phase of the modulated sin function
+*off* is the offset
+
+The sequence starts with a ramp up and ends with a ramp down interval
+
+## usbfs_control.py
+Python script that allows to start a sequence and to receive the data of the receive channel via the fast USBFS interface.
+The *com_port* variable must be adapted to the Port of the PSoC on the computer which can be found in Windows under *Device Manager*. The script plots the data and saves the data as ascii table with continuous numbering in the same folder as the script.
