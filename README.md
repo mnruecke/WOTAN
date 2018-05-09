@@ -11,10 +11,10 @@ The MPI scanner control module has 4 transmit channels (4x 250 kS/s, 8 bit, up t
 
 2. Opening the workspace "WOTAN" shows three projects.
 *WOTAN* is the version used for the TWMPI scanner. It requires a few external components to run.
-*WOTAN\_Simplified* contains basically the same code but can be used without any external components (at the cost of accuracy and performance).
-This version is therefore recommended for debugging and first tests. *WOTAN_PULSE* is a version that contains only the receive chain and a trigger output.
+In *WOTAN\_Simplified* a sequence can be generated and transfered to the PSoC via the USBFS using the *generate_sequency.py* Python script.
+*WOTAN_PULSE* is a version that contains only the receive chain and a trigger output.
 
-3. For writing the firmware to the chip connect the module to the USB port, select *WOTAN\_Simplified* as active project (right mouse click) and press CTRL-F5 for compiling and programming. 
+3. For writing the firmware to the chip connect programmer to the PSoc and the PC via USB port, select *WOTAN\_Simplified* as active project (right mouse click) and press CTRL-F5 for compiling and programming. 
 
 4. Open the device manager in windows in order to see as which com-port the USBUART of the onboard programmer enumerates.
 
@@ -31,3 +31,14 @@ This version is therefore recommended for debugging and first tests. *WOTAN_PULS
 10. For using the HC-05 bluetooth module: a) connect it as indicated in the schematic in the Creator IDE and b) go into *main.c* and set the two variables *BLE_available* and *BLE_baud_rate* at the beginning to the correct values (see comments in code). 
 
 11. Push the boundaries of MPI hardware development beyond good and evil
+
+
+## WOTAN_simplified
+Firmware for the PSoc Chip that allows to receive an arbitrary sequence via the USBFS interface (see *generate_sequence.py*). 
+The sequence is then stored in the Flash. On first startup after loading the firmware to PSoC it generates an default sequence.
+The PSoc can be controlled using the Python script *usbfs_control.py*.
+## generate sequency
+Python script that allows to send an arbitrary sequence to the PSoc with Firmware *WOTAN\_simplified*
+The *com_port* variable must be adapted
+## usbfs.py
+Python script that
