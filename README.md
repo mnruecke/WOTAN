@@ -9,12 +9,11 @@ The MPI scanner control module has 4 transmit channels (4x 250 kS/s, 8 bit, up t
 ## Getting Started
 1. For programming the module, Creator 4.1 or higher is necessary, which can be downloaded for free from Cypress Semiconductor (www.cypress.com).
 
-2. Opening the workspace "WOTAN" shows three projects.
-*WOTAN* is the version used for the TWMPI scanner. It requires a few external components to run.
-In *WOTAN\_Simplified* a sequence can be generated and transfered to the PSoC via the USBFS using the *generate_sequency.py* Python script.
+2. Opening the workspace "WOTAN" shows two projects.
+*WOTAN* is the version used for the TWMPI scanner. It is recommended to add an external oscillator crystal (the accuracy of the chip intern oscillator is only ~0.25% and shows a strong temperature dependence). Arbitrary sequences can be generated and transfered to the PSoC via the USBFS using the *generate_sequency.py* Python script.
 *WOTAN_PULSE* is a version that contains only the receive chain and a trigger output.
 
-3. For writing the firmware to the chip connect programmer to the PSoc and the PC via USB port, select *WOTAN\_Simplified* as active project (right mouse click) and press CTRL-F5 for compiling and programming. 
+3. For writing the firmware to the chip connect programmer to the PSoc and the PC via USB port, select *WOTAN* as active project (right mouse click) and press CTRL-F5 for compiling and programming. 
 
 4. Open the device manager in windows in order to see as which com-port the USBUART of the onboard programmer enumerates.
 
@@ -33,17 +32,17 @@ In *WOTAN\_Simplified* a sequence can be generated and transfered to the PSoC vi
 11. Push the boundaries of MPI hardware development beyond good and evil
 
 
-## WOTAN_simplified
-Firmware for the PSoc Chip that allows to receive an arbitrary sequence via the USBFS interface (see *generate_sequence.py*). 
+## Sequence
+The Firmware for the PSoc Chip allows to transfer an arbitrary sequence via the USBFS interface (see *generate_sequence.py*). 
 The sequence is then stored in the Flash. On first startup after loading the firmware to PSoC it generates an default sequence.
 The PSoc can be controlled using the Python script *usbfs_control.py*.
 
-## generate_sequency.py
+## generate\_sequency.py
 Python script that allows to send an arbitrary sequence to the PSoc with Firmware *WOTAN\_simplified* via the fast USBFS interface, so no programmer is needed to change the sequence.
 The *com_port* variable must be adapted to the Port of the PSoC on the computer which can be found in Windows under *Device Manager*.
 It is possible to generate a sequence for each output channel in the form  
 
-amp * sin(2pi * f + phi) * sin(2pi * f_mod + phi_mod) + off
+amp * sin(2pi * f + phi) * sin(2pi * f\_mod + phi\_mod) + off
 
 where
 *amp* is the amplitude  
@@ -55,6 +54,8 @@ where
 
 The sequence starts with a ramp up and ends with a ramp down interval
 
-## usbfs_control.py
+## usbfs\_control.py
 Python script that allows to start a sequence and to receive the data of the receive channel via the fast USBFS interface.
 The *com_port* variable must be adapted to the Port of the PSoC on the computer which can be found in Windows under *Device Manager*. The script plots the data and saves the data as ascii table with continuous numbering in the same folder as the script.
+
+

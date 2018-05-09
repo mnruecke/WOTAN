@@ -22,7 +22,9 @@
  */
 
 
-// This version does not need an external crystal by default
+// THIS VERSION NEEDS AN XTAL TO RUN!
+//  or change  in "Design Wide Resources - Clocks" XTAL to IMO
+//  (i.e. the oscillator integrated on the chip)
 
 
 #include "project.h"
@@ -52,12 +54,6 @@
 #define  KEY_DAC3            '3'
 #define  KEY_DAC4            '4'
 #define  KEY_SIG_IN          '5'
-
-#define  KEY_WRITE_SEQUENCE  'p'
-#define  KEY_TRIGGER_OUT     'x'
-#define  KEY_TRIGGER_IN      'y'
-#define  TRIGGER_OUT_TRUE    1
-#define  TRIGGER_OUT_FALSE   0
 
 #define  NSAMPLES_ADC       15000               // 1 MS/s, max value: 15000
 #define  NSAMPLES_DAC       NSAMPLES_ADC/4      // 250 kS/s (make sample duration for Transmit and Receive the same)
@@ -212,8 +208,7 @@ uint16 signal_adc_2[NSAMPLES_ADC];
 void init_components(void);
 void show_default_message(void);
 void show_channel_num(void);
-void set_sequence_params(uint8 *);
-void set_wave_form(uint8 *);
+void set_sequence_params(void);
 void generate_sequence(void);
 void run_sequence(char);
 void display_results(void);
@@ -247,17 +242,12 @@ int main(void)
     if( *(FLASH_CH1 ) == 0 ) // Skip sequence generation if non-empty
         generate_sequence(); // (calculation takes ~5 seconds on PSoC)
     show_default_message();
-    
-    // Avoid errorness serial input due to initial switching noise:
-    CyDelay(500);
-    UART_1_ClearRxBuffer();
-    BLE_UART_ClearRxBuffer();
       
     for(;;) 
     {       
         // Control interface via UART for Putty or Matlab/Octave/Python
-        uart_interface();  // for using USBUART included on Programmer Kit
-        //ble_uart_interface();
+        //uart_interface();  // for using USBUART included on Programmer Kit
+        ble_uart_interface();
         usbfs_send_data(); // for using fast USBUART routed to the onboard Micro-USB-B socket
         
     }
@@ -374,14 +364,6 @@ void display_results(void)
 
 void usbfs_send_data(void)
 {
-    uint size_of_header  = 8;
-    uint size_of_segment = 32;
-    uint number_of_packages;
-    uint package_number;
-    uint number_of_samples;
-    uint channel_number;
-    char * wave_segment_ptr;
-    
      /* Host can send double SET_INTERFACE request. */
     if (0u != USBUART_IsConfigurationChanged())
     {
@@ -404,7 +386,11 @@ void usbfs_send_data(void)
             count = USBUART_GetAll(buffer);
 
             if (0u != count)
-            {   
+            {
+                LED_Write(1u);
+                CyDelay(50);
+                LED_Write(0u);
+                
                 /* Avoid interference with the UART_1 component */
                 UART_1_ClearRxBuffer();
                 UART_1_ClearTxBuffer();
@@ -424,37 +410,8 @@ void usbfs_send_data(void)
                 // 3) reset firmware 
                 if ( buffer[0] == KEY_RESET )
                     CySoftwareReset(); // If Putty is used: this ends the session!
-                // 4) set new parameters
-                if ( buffer[0] == KEY_WRITE_SEQUENCE )
-                {
-                    // get parameters:
-                    number_of_packages  = (256*buffer[4]+buffer[5]);
-                    package_number      = (256*buffer[2]+buffer[3]);
-                    number_of_samples   = number_of_packages*size_of_segment;
-                    channel_number      = buffer[1];
-                    
-                    // write wave into flash memory:
-                    wave_segment_ptr    = ((char *) signal_adc_1) + size_of_segment * package_number;
-                    strcpy(  wave_segment_ptr, (char *) &buffer[size_of_header] );                  
-                    if( package_number == (number_of_packages-1) )
-                    {
-                        FLASH_Write( (uint8*)signal_adc_1, twMPI->flash_ptr[channel_number], number_of_samples);
-                    }
-                }
-                // 5) Use gpio P3[0] as trigger output
-                if ( buffer[0] == KEY_TRIGGER_OUT )             
-                { 
-                    CompTrigger_Stop();
-                    enableTrigOut_Write( TRIGGER_OUT_TRUE );
-                }
-                // 6) Use gpio P3[0] as trigger input
-                if ( buffer[0] == KEY_TRIGGER_IN )             
-                { 
-                    CompTrigger_Start();
-                    enableTrigOut_Write( TRIGGER_OUT_FALSE );
-                }     
-                
-                // 7) Get the binary data from the two uint16 ADC buffers
+                  
+                // 4) Get the binary data from the two uint16 ADC buffers
                 if ( buffer[0] == KEY_SEND_BYTE_DAT )
                 {
                     LED_Write(1u);
@@ -483,7 +440,7 @@ void usbfs_send_data(void)
     }
 } //usbfs_send_data()
 
-void set_sequence_params(uint8 * params)
+void set_sequence_params(void)
 {
     // clear token
     puttyIn[0]=0;
@@ -499,19 +456,11 @@ void set_sequence_params(uint8 * params)
         //phi
         //phi_mod
         //amp
-        twMPI->amp[0] = params[8];// ((float) (100*(puttyIn[3]-'0') + 10*(puttyIn[4]-'0') * 1*(puttyIn[5]-'0')));
-        twMPI->amp[1] = params[9];// ((float) (100*(puttyIn[3]-'0') + 10*(puttyIn[4]-'0') * 1*(puttyIn[5]-'0')));
-        twMPI->amp[2] = params[10];// ((float) (100*(puttyIn[3]-'0') + 10*(puttyIn[4]-'0') * 1*(puttyIn[5]-'0')));
-        twMPI->amp[3] = params[11];// ((float) (100*(puttyIn[3]-'0') + 10*(puttyIn[4]-'0') * 1*(puttyIn[5]-'0')));
+        twMPI->amp[0] = 50.0;// ((float) (100*(puttyIn[3]-'0') + 10*(puttyIn[4]-'0') * 1*(puttyIn[5]-'0')));
         //off
     }
     generate_sequence();
 }
-
-void set_wave_form(uint8* wave)
-{
-    
-}   
 
 void generate_sequence(void)
 {
@@ -617,7 +566,7 @@ void uart_interface(void)
         // Set new sequence parameters via uart
         if( puttyIn[0] == 't' && puttyIn[1] == 't' && puttyIn[2] == 't')
         {
-            //set_sequence_params();
+            set_sequence_params();
         }   
         
         // 3) Putty user interface
