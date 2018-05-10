@@ -10,7 +10,9 @@ The MPI scanner control module has 4 transmit channels (4x 250 kS/s, 8 bit, up t
 1. For programming the module, Creator 4.1 or higher is necessary, which can be downloaded for free from Cypress Semiconductor (www.cypress.com).
 
 2. Opening the workspace "WOTAN" shows two projects.
-*WOTAN* is the version used for the TWMPI scanner. It is recommended to add an external oscillator crystal (the accuracy of the chip intern oscillator is only ~0.25% and shows a strong temperature dependence). Arbitrary sequences can be generated and transfered to the PSoC via the USBFS using the *generate_sequency.py* Python script.
+*WOTAN* is the version used for the TWMPI scanner.
+It is recommended to add an external oscillator crystal (the accuracy of the chip intern oscillator is only ~0.25% and shows a strong temperature dependence).
+Arbitrary sequences can be generated and transfered to the PSoC via the USBFS using the *.\UI\_WOTAN\\generate\_sequency\_usbfs.py* Python script.
 *WOTAN_PULSE* is a version that contains only the receive chain and a trigger output.
 
 3. For writing the firmware to the chip connect programmer to the PSoc and the PC via USB port, select *WOTAN* as active project (right mouse click) and press CTRL-F5 for compiling and programming. 
