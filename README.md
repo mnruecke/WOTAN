@@ -23,22 +23,23 @@ The MPI scanner control module has 4 transmit channels (4x 250 kS/s, 8 bit, up t
 
 7. The numbers 1..4 select the receive channel to the DAC outputs 1..4, Pressing '5' measures the signal at GPIO 0.7. Pressing 's' starts a measurement of 15 ms and shows the results as ascii table (pressing any key will interupt the output).
 
-8. The measurement can be easily automated. Example scripts ready to run (after changing the com-port number) are included for octave, matlab and python 3 (uart\_control\_octave.m, uart\_control\_matlab.m, uart\_control\_python3.py). The matlab version will run without additional packages after changing the com-port number in the script. Octave needs the signal-toolbox. Python requires the 'pyserial' package, in addition to 'numpy' and 'matplotlib' for data visualization. The later are typically included in scientific oriented python environments like anaconda or spyider. Packages can be easily added to python by using the package manager pip.  
+8. The measurement can be easily automated. Example scripts ready to run (after changing the com-port number) are included for octave, matlab and python 3 in *.\\UI\_WOTAN\\example_scripts\\*. The matlab version will run without additional packages after changing the com-port number in the script. Octave needs the signal-toolbox. Python requires the 'pyserial' package, in addition to 'numpy' and 'matplotlib' for data visualization. The later are typically included in scientific oriented python environments like anaconda or spyider. Packages can be easily added to python by using the package manager pip.  
 
 9. The micro B connector on the board is connected to a fast USBUART which works the same way as the USBUART on the programmer, but with 12.5 Mbps.
 
-10. For using the HC-05 bluetooth module: a) connect it as indicated in the schematic in the Creator IDE and b) go into *main.c* and set the two variables *BLE_available* and *BLE_baud_rate* at the beginning to the correct values (see comments in code). 
+10. For using the HC-05 bluetooth module: a) connect it as indicated in the schematic in the Creator IDE and b) go into *main.c* and comment the function *uart_interface()*  and uncomment the function *ble_interface()* instead. The HC-05 module or similar bluetooth modems enumerate as a virtual com port and it can be used the same way as the USBUART included on the programmer. 
 
 11. Push the boundaries of MPI hardware development beyond good and evil
 
 
-## Sequence
-The Firmware for the PSoc Chip allows to transfer an arbitrary sequence via the USBFS interface (see *generate_sequence.py*). 
+## Running the module via python scripts
+The folder *.\\UI_WOTAN* contains two python scripts for creating and running sequences.
+The Firmware for the PSoC Chip allows to transfer an arbitrary sequence via the USBFS interface (see *.\\UI\_WOTAN\\generate_sequence_usbfs.py*). 
 The sequence is then stored in the Flash. On first startup after loading the firmware to PSoC it generates an default sequence.
-The PSoc can be controlled using the Python script *usbfs_control.py*.
+The PSoc can be controlled using the Python script *.\\UI\_WOTAN\\run_sequence_usbfs.py*. 
 
-## generate\_sequency.py
-Python script that allows to send an arbitrary sequence to the PSoc with Firmware *WOTAN\_simplified* via the fast USBFS interface, so no programmer is needed to change the sequence.
+## .\\UI\_WOTAN\\generate\_sequency\_usbfs.py
+Python script that allows to send an arbitrary sequence to the PSoc with Firmware *WOTAN* via the fast USBFS interface, so no programmer is needed to change the sequence.
 The *com_port* variable must be adapted to the Port of the PSoC on the computer which can be found in Windows under *Device Manager*.
 It is possible to generate a sequence for each output channel in the form  
 
@@ -54,7 +55,7 @@ where
 
 The sequence starts with a ramp up and ends with a ramp down interval
 
-## usbfs\_control.py
+## .\\UI\_WOTAN\\run\_sequence\_usbfs.py
 Python script that allows to start a sequence and to receive the data of the receive channel via the fast USBFS interface.
 The *com_port* variable must be adapted to the Port of the PSoC on the computer which can be found in Windows under *Device Manager*. The script plots the data and saves the data as ascii table with continuous numbering in the same folder as the script.
 

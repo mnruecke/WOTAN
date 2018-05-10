@@ -19,6 +19,7 @@
 *.cydsn/*_timing.html
 
 Backup/*.zip
+__pycache__/
 
 # User files
 3D_mpi_data_*.txt

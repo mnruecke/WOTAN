@@ -49,7 +49,7 @@ import timeit
 """ 0) main settings """
 # 0.1) serial port
 #      this script targets the faster USBUART routed to the Micro-USB-B socket
-com_port         = '\\\\.\\COM8'
+com_port         = '\\\\.\\COM24'
 baudrate         = 1 # USBFS component ignores this parameter
 time_out         = 1 # [s]; this script should retrieve the 60 kB data in << 1s
 
@@ -75,7 +75,7 @@ len_data = 32
 
 
 """ generates sequence """
-f = frequency_scale*np.asarray([1000,2000,4000,8000])         # frequency in Hz
+f = frequency_scale*np.asarray([100,200,400,800])         # frequency in Hz
 f_mod = frequency_scale*np.asarray([0.0,0,0,0])      # in Hz
 phi = np.asarray([0,90,0,0])         # in degree
 phi_mod = np.asarray([90,90,90,90])     # in degree
