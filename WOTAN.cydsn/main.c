@@ -36,15 +36,16 @@
 #define START_CLOCK         0
 #define STOP_CLOCK          1
 
-// UART interface
+// USB interface
 #define  UART_BUF_IN         100
 #define  UART_BUF_OUT        80
 #define  KEY_RUN             'r'
-#define  KEY_RUN_ALT         'v'
 #define  KEY_RUN_AND_SHOW    's'
 #define  KEY_RUN_NEXT_SHOW   'a'
 #define  KEY_SEND_ASCII_DAT  'd'
 #define  KEY_SEND_BYTE_DAT   'o'
+
+
 #define  KEY_SET_PARAMS      't'
 #define  KEY_RESET           'e'
 #define  KEY_DAC1            '1'
@@ -219,7 +220,7 @@ void run_sequence(char);
 void display_results(void);
 void uart_interface(void);
 void ble_uart_interface(void);
-void usbfs_send_data(void);
+void usbfs_interface(void);
 void dma_dac_1_init(void);
 void dma_dac_2_init(void);
 void dma_dac_3_init(void);
@@ -258,7 +259,7 @@ int main(void)
         // Control interface via UART for Putty or Matlab/Octave/Python
         uart_interface();  // for using USBUART included on Programmer Kit
         //ble_uart_interface();
-        usbfs_send_data(); // for using fast USBUART routed to the onboard Micro-USB-B socket
+        usbfs_interface(); // for using fast USBUART routed to the onboard Micro-USB-B socket
         
     }
 }/* END MAIN() ***********************************/
@@ -298,9 +299,14 @@ void init_components(void)
     refOut_Start();
     sigBuf_Start();
     
+    // Sets the Trigger channel as ouput
+    CompTrigger_Stop();
+    enableTrigOut_Write( TRIGGER_OUT_TRUE );
+    
     // Components for user interface and debugging
     ChannelSel_Start();
-        ChannelSel_Select(current_chan=4);
+        // use real input by default
+        ChannelSel_Select(current_chan=KEY_SIG_IN-1-'0');
     UART_1_Start();
     CompTrigger_Start();
         isrTrigger_StartEx( isr_triggerIn );
@@ -322,8 +328,6 @@ void show_default_message(void)
     sprintf(sms, "Press '%c' to run the sequence and show the results (ASCII table)", KEY_RUN_AND_SHOW);
         UART_1_PutString(sms); UART_1_PutCRLF(1);
     sprintf(sms, "Press '%c' to only run the sequence (No ASCII table, currently measured: Channel %d)", KEY_RUN,  current_chan +1);
-        UART_1_PutString(sms); UART_1_PutCRLF(1);
-    sprintf(sms, "Press '%c' to only run the alternating sequence (odd: CH3 is off, even: CH4 is off)", KEY_RUN_ALT);
         UART_1_PutString(sms); UART_1_PutCRLF(1);
     sprintf(sms, "Press '%c' to show last results (ASCII table)", KEY_SEND_ASCII_DAT);
         UART_1_PutString(sms); UART_1_PutCRLF(1);
@@ -372,7 +376,7 @@ void display_results(void)
     show_default_message();  
 }
 
-void usbfs_send_data(void)
+void usbfs_interface(void)
 {
     uint size_of_header  = 8;
     uint size_of_segment = 32;
@@ -419,7 +423,7 @@ void usbfs_send_data(void)
                 if ( buffer[0] == KEY_DAC1 || buffer[0] == KEY_DAC2 || buffer[0] == KEY_DAC3 || buffer[0] == KEY_DAC4 || buffer[0] == KEY_SIG_IN)
                         ChannelSel_Select( buffer[0]-1-'0' );
                 // 2) run sequence
-                if ( buffer[0] == KEY_RUN || buffer[0] == KEY_RUN_ALT)
+                if ( buffer[0] == KEY_RUN)
                     run_sequence( buffer[0] );
                 // 3) reset firmware 
                 if ( buffer[0] == KEY_RESET )
@@ -481,7 +485,7 @@ void usbfs_send_data(void)
             }
         }
     }
-} //usbfs_send_data()
+}
 
 void set_sequence_params(uint8 * params)
 {
@@ -578,16 +582,11 @@ void run_sequence(char selSequ)
 
         dma_dac_1_init();
         dma_dac_2_init();
-        if( selSequ == KEY_RUN_ALT)
-        {
-            if( (count_of_runs%2) == 0)  dma_dac_3_init(); // count_of_runs = EVEN
-            else                         dma_dac_4_init(); // count_of_runs = ODD
-        }
-        else
-        {
-            dma_dac_3_init();
-            dma_dac_4_init();
-        }
+        
+
+        dma_dac_3_init();
+        dma_dac_4_init();
+  
         dma_adc_1_init();
         dma_adc_2_init();
         
@@ -633,9 +632,6 @@ void uart_interface(void)
                 run_sequence(puttyIn[0]);
             break;
                 
-            case KEY_RUN_ALT: // run sequence - alternating channel 3 and 4 per run  (just running, no output)
-                run_sequence(puttyIn[0]);
-            break;
             // 'o' : trigger streaming ADC data in binary form
             //          for showing data with Matlab/Octave instead of Putty
             case KEY_SEND_BYTE_DAT:
@@ -737,12 +733,6 @@ void ble_uart_interface(void)
             if( puttyInBLE[COMMAND_NUMBER] == '1')
             {
                 run_sequence(KEY_RUN);
-                // Don't send data before sequence has finished (ignore down ramping, i.e. last 1/3 of sequence)
-                CyDelayUs(SEQU_DURATION_US*2/3);
-            }
-            else if( puttyInBLE[COMMAND_NUMBER] == '2')
-            {
-                run_sequence(KEY_RUN_ALT);
                 // Don't send data before sequence has finished (ignore down ramping, i.e. last 1/3 of sequence)
                 CyDelayUs(SEQU_DURATION_US*2/3);
             }
