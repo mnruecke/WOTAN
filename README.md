@@ -61,4 +61,40 @@ The sequence starts with a ramp up and ends with a ramp down interval
 Python script that allows to start a sequence and to receive the data of the receive channel via the fast USBFS interface.
 The *com_port* variable must be adapted to the Port of the PSoC on the computer which can be found in Windows under *Device Manager*. The script plots the data and saves the data as ascii table with continuous numbering in the same folder as the script.
 
+## Running .\\UI\_WOTAN with arbitrary software
+The WOTAN firmware can be controlled via the following ascii characters that have to be send to the PSoC via USB intervace
+
+- **p** (**P**rogramm sequence) To write an arbitrary sequence with a length of 3x3750 to the PSoc the **p** character is used. 
+  A sequence consist of three parts
+  * A ramp up sequence (3750 samples)
+  * The actual sequence (3750 samples)
+  * A ramp down sequence (3750 samples)
+  
+  The ADC of the PSoC measures only during the actual sequence.  
+  
+  The sequence must be sent consecutively for each channel. Therefore the sequence for one channel must be diveded into packages  that consist of a 8 bit **header** and 32 bit of **data**. 
+  The **header** must have the following form 
+  * ascii character **'p'**=112
+  * **1-4** for the channel 
+  * Two bytes for the package number starting with the high byte
+  * Two bytes for the total number of packages per channel (number of samples per channel/32) starting with the high byte
+  * 0
+  * 0
+  
+  So the total package looks for example like this
+  ('p', 2, 0x01, 0xFF, 0x02, 0x00, '0', '0',   1, 2, 4, ...... , 4, 2, 1)  
+  This example shows the package with package number 0x01FF (=511) of total 0x0200 (=512) packages with the data 1, 2, 4, ..... , 4, 2, 1 for channel 2.
+
+
+- **r** (**R**un sequence) The PSoC starts the sequence on the four DACs. The sequence consists of three parts. In the fist part the signal is supposed to ramp up. The second part is the acutal sequence. In the fist part the signal is supposed to ramp down. The ADC measures only in the actual sequence (second part)
+- **o** (**O**rder data) The PSoC sends the data from the last measurement as a byte stream starting with the first value. Two bytes form an 16bit number where the high byte is sent first. 
+The time between the **r** and the **o** command must be at least *30ms*
+
+
+
+- **x** Sets the trigger channel as an output (default)
+- **y** Sets the trigger channel as an input (not advisable since there is at least *10ns* trigger jitter)
+
+
+
 
