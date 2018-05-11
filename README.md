@@ -61,7 +61,7 @@ The sequence starts with a ramp up and ends with a ramp down interval
 Python script that allows to start a sequence and to receive the data of the receive channel via the fast USBFS interface.
 The *com_port* variable must be adapted to the Port of the PSoC on the computer which can be found in Windows under *Device Manager*. The script plots the data and saves the data as ascii table with continuous numbering in the same folder as the script.
 
-## Running .\\UI\_WOTAN with arbitrary software
+## Running WOTAN with arbitrary software
 The WOTAN firmware can be controlled via the following ascii characters that have to be send to the PSoC via USB intervace
 
 - **p** (**P**rogramm sequence) To write an arbitrary sequence with a length of 3x3750 to the PSoc the **p** character is used. 
