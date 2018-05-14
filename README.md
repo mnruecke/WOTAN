@@ -40,6 +40,11 @@ The Firmware for the PSoC Chip allows to transfer an arbitrary sequence via the 
 The sequence is then stored in the Flash. On first startup after loading the firmware to PSoC it generates an default sequence.
 The PSoc can be controlled using the Python script *.\\UI\_WOTAN\\run_sequence_usbfs.py*. 
 
+## Using the fast USBUART component (micro-B connector) in Windows 7, Windows 10 and Linux
+In Windows 7 it might be necessary to add the driver manually. Open the *Device Manager* and find the USBUART interface in the **Other Devices** category. Open the context menu and select *Update Driver Software*. Select the *USBUART_cdc.inf* file in the root directory. It should then enumerate as a virtual com port.
+In Windows 10 it is typically recognized automatically and enumerated as a virtual com port.
+In Linux, the USBUART component should also be recognized automatically and appear in /dev/ e.g. as */dev/ttyACM0*, i.e. the *com_port* variable in the python scripts mentioned below needs to be set as *com_port = '/dev/ttyACM0'* in this example. Linux doesn't grand access rights per default. This can be changed e.g. with *sudo chmod 777 /dev/ttyACM0*. 
+
 ## .\\UI\_WOTAN\\generate\_sequency\_usbfs.py
 Python script that allows to send an arbitrary sequence to the PSoc with Firmware *WOTAN* via the fast USBFS interface, so no programmer is needed to change the sequence.
 The *com_port* variable must be adapted to the Port of the PSoC on the computer which can be found in Windows under *Device Manager*.
