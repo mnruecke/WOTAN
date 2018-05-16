@@ -77,7 +77,7 @@ try: # open and interact with serial port
     
     start = timeit.default_timer()
 #   run MPI sequence on pso
-    ser.write( b'5' )
+    ser.write( b'1' )
     time.sleep(0.001)
     ser.write( p_trig_dir )
     time.sleep(0.001)
@@ -104,12 +104,8 @@ if len(adc_data_bin) == numOfSamples*bytesPerSample: # check if data was receive
     # find and correct scaling difference between ADC 1 (even samples)
     # and ADC 2 (odd samples)
     # (this method fails if signal has steps or goes into saturation!)
-    adc1UNIONadc2 = np.arange(len(adc_data_int16))    
-    adc1UNIONadc2[0::2] = adc_data_int16[0:int(len(adc_data_int16)/2)]
-    adc1UNIONadc2[1::2] = adc_data_int16[int(len(adc_data_int16)/2):]    
-    
-    adc1 = adc1UNIONadc2[0::2]
-    adc2 = adc1UNIONadc2[1::2]
+    adc1 = adc_data_int16[0::2]
+    adc2 = adc_data_int16[1::2]
     
     adc1DIVadc2 = 0;
     for sp in range(len(adc1)):

@@ -461,26 +461,31 @@ void usbfs_interface(void)
                 // 7) Get the binary data from the two uint16 ADC buffers
                 if ( buffer[0] == KEY_SEND_BYTE_DAT )
                 {
+                    uint8 * adc1_ptr = (uint8 *) (signal_adc_1);
+                    uint8 * adc2_ptr = (uint8 *) (signal_adc_2);
+                    uint8 adc1_adc2_interleaved[USBFS_TX_SIZE];
+                    
                     LED_Write(1u);
                     // turn uint16 arrays into byte stream (ADC 1 and ADC 2 separate)
-                    // ODD samples
-                    for(int j=0;j<NSAMPLES_ADC/USBFS_TX_SIZE*DMA_ADC_1_BYTES_PER_BURST;j++)
+                    for(int j=0;j<2*NSAMPLES_ADC/USBFS_TX_SIZE*DMA_ADC_1_BYTES_PER_BURST;j++)
                     {
+                        // a) create data packet fitting in usb tx buffer
+                        for(int m=0; m<=USBFS_TX_SIZE/4; m++)
+                        {
+                            adc1_adc2_interleaved[4*m+0]=*( adc1_ptr + ((j)*USBFS_TX_SIZE/2+(2*m+0)) );                           
+                            adc1_adc2_interleaved[4*m+1]=*( adc1_ptr + ((j)*USBFS_TX_SIZE/2+(2*m+1)) );                           
+                            adc1_adc2_interleaved[4*m+2]=*( adc2_ptr + ((j)*USBFS_TX_SIZE/2+(2*m+0)) );                           
+                            adc1_adc2_interleaved[4*m+3]=*( adc2_ptr + ((j)*USBFS_TX_SIZE/2+(2*m+1)) );                           
+                        }
+                        
+                        // b) send
                         while (0u == USBUART_CDCIsReady())
                         {
                         }                  
-                        USBUART_PutData( ((uint8 *) (signal_adc_1)+(j*USBFS_TX_SIZE) ), USBFS_TX_SIZE);  
+                        USBUART_PutData( adc1_adc2_interleaved , USBFS_TX_SIZE);  
                     }
-                    // EVEN samples
-                    for(int j=0;j<NSAMPLES_ADC/USBFS_TX_SIZE*DMA_ADC_1_BYTES_PER_BURST;j++)
-                    {
-                        while (0u == USBUART_CDCIsReady())
-                        {
-                        }                  
-                        USBUART_PutData( ((uint8 *) (signal_adc_2)+(j*USBFS_TX_SIZE) ), USBFS_TX_SIZE);  
-                    }                    
                     LED_Write(0u);
-                }
+                }// END send binary adc data
 
             }
         }
