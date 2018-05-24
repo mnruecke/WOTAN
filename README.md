@@ -83,8 +83,8 @@ The WOTAN firmware can be controlled via the following ascii characters that hav
   * **1-4** for the channel 
   * Two bytes for the package number starting with the high byte
   * Two bytes for the total number of packages per channel (number of samples per channel/32) starting with the high byte
-  * 0
-  * 0
+  * not used (e.g. 0)
+  * not used (e.g. 0)
   
   So the total package looks for example like this
   ('p', 2, 0x01, 0xFF, 0x02, 0x00, '0', '0',   1, 2, 4, ...... , 4, 2, 1)  
