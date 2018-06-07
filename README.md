@@ -10,9 +10,9 @@ The MPI scanner control module has 4 transmit channels (4x 250 kS/s, 8 bit, up t
 1. For programming the module, Creator 4.1 or higher is necessary, which can be downloaded for free from Cypress Semiconductor (www.cypress.com).
 
 2. Opening the workspace "WOTAN" shows two projects.
-*WOTAN* is the version used for the TWMPI scanner.
-It is recommended to add an external oscillator crystal (the accuracy of the chip intern oscillator is only ~0.25% and shows a strong temperature dependence).
-Arbitrary sequences can be generated and transfered to the PSoC via the USBFS using the *.\UI\_WOTAN\\generate\_sequency\_usbfs.py* Python script.
+*WOTAN* is the version used for the TWMPI scanner. It uses the internal oscillator ("IMO") by default and therefore runs without adding an external crystal.
+Yet it is highly recommended to add an external oscillator crystal (the accuracy of the chip intern oscillator is only ~0.25% and shows a strong temperature dependence).
+Arbitrary sequences can be generated and transfered to the PSoC via the USBFS using the *.\UI\_WOTAN\\generate\_sequency\_usbfs.py* Python script. *WOTAN_8MHz_Quartz* is identical with *WOTAN* but requires an external 8 MHz crytal by default. 
 *WOTAN_PULSE* is a version that contains only the receive chain and a trigger output.
 
 3. For writing the firmware to the chip connect programmer to the PSoc and the PC via USB port, select *WOTAN* as active project (right mouse click) and press CTRL-F5 for compiling and programming. 
@@ -67,7 +67,7 @@ Python script that allows to start a sequence and to receive the data of the rec
 The *com_port* variable must be adapted to the Port of the PSoC on the computer which can be found in Windows under *Device Manager*. The script plots the data and saves the data as ascii table with continuous numbering in the same folder as the script.
 
 ## Running WOTAN with arbitrary software
-The WOTAN firmware can be controlled via the following ascii characters that have to be send to the PSoC via USB intervace
+The WOTAN firmware can be controlled via the following ascii characters that have to be send to the PSoC via USB interface
 
 - **p** (**P**rogramm sequence) To write an arbitrary sequence with a length of 3x3750 to the PSoc the **p** character is used. 
   A sequence consist of three parts
@@ -99,6 +99,9 @@ The time between the **r** and the **o** command must be at least *30ms*
 
 - **x** Sets the trigger channel as an output (default)
 - **y** Sets the trigger channel as an input (not advisable since there is at least *10ns* trigger jitter)
+
+- **V** gives out the Version number of the firmware (ascii format)
+- **S** gives out a unique chip identification number (7 numbers ranging from 0..255 and in ascii format, each separated by a space)
 
 - **1**-**4** Routes the output of channel 1-4 directly to the ADC internally, so the device can be tested with the PSoC only without exteral hardware.
 
