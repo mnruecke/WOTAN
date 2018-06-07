@@ -83,8 +83,8 @@ The WOTAN firmware can be controlled via the following ascii characters that hav
   * **1-4** for the channel 
   * Two bytes for the package number starting with the high byte
   * Two bytes for the total number of packages per channel (number of samples per channel/32) starting with the high byte
-  * 0
-  * 0
+  * not used (e.g. 0)
+  * not used (e.g. 0)
   
   So the total package looks for example like this
   ('p', 2, 0x01, 0xFF, 0x02, 0x00, '0', '0',   1, 2, 4, ...... , 4, 2, 1)  
@@ -99,6 +99,10 @@ The time between the **r** and the **o** command must be at least *30ms*
 
 - **x** Sets the trigger channel as an output (default)
 - **y** Sets the trigger channel as an input (not advisable since there is at least *10ns* trigger jitter)
+
+- **1**-**4** Routes the output of channel 1-4 directly to the ADC internally, so the device can be tested with the PSoC only without exteral hardware.
+
+- **5** ADC is not connected internally so an external source can be used (default mode)
 
 
 
