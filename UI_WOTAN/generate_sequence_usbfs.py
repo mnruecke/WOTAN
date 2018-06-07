@@ -75,7 +75,7 @@ len_data = 32
 
 
 """ generates sequence """
-f = frequency_scale*np.asarray([1000,5000,10000,20000])         # frequency in Hz
+f = frequency_scale*np.asarray([100,5000,10000,20000])         # frequency in Hz
 f_mod = frequency_scale*np.asarray([0.0,0,0,0])      # in Hz
 phi = np.asarray([0,90,0,0])         # in degree
 phi_mod = np.asarray([90,90,90,90])     # in degree

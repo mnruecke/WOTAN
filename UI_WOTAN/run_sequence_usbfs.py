@@ -77,7 +77,7 @@ try: # open and interact with serial port
     
     start = timeit.default_timer()
 #   run MPI sequence on pso
-    ser.write( b'1' )
+    ser.write( b'5' )
     time.sleep(0.001)
     ser.write( p_trig_dir )
     time.sleep(0.001)

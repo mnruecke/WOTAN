@@ -23,12 +23,13 @@
 
 
 // This version does not need an external crystal by default
-
-
 #include "project.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+
+char  version[3] = "1.0";
+
 
 #define  TRUE               1
 #define  FALSE              0
@@ -44,6 +45,9 @@
 #define  KEY_RUN_NEXT_SHOW   'a'
 #define  KEY_SEND_ASCII_DAT  'd'
 #define  KEY_SEND_BYTE_DAT   'o'
+
+#define  KEY_VERSION         'V'
+#define  KEY_SERIAL_NUMBER   'S'
 
 
 #define  KEY_SET_PARAMS      't'
@@ -457,8 +461,34 @@ void usbfs_interface(void)
                     CompTrigger_Start();
                     enableTrigOut_Write( TRIGGER_OUT_FALSE );
                 }     
+                // 7) Firmware information
                 
-                // 7) Get the binary data from the two uint16 ADC buffers
+                if ( buffer[0] == KEY_VERSION )
+                {
+                    while (0u == USBUART_CDCIsReady());
+                    USBUART_PutData( (uint8 *) version , 3);
+                }
+                // 8) Chip information
+                int strlength = 34;
+                char pseudoid[strlength];
+                if ( buffer[0] == KEY_SERIAL_NUMBER )
+                {
+                    sprintf( pseudoid, "                                  ");
+                    sprintf( pseudoid, "%3d %3d %3d %3d %3d %3d %3d",\
+                        *(uint8 *)CYREG_FLSHID_CUST_TABLES_Y_LOC,\
+                        *(uint8 *)CYREG_FLSHID_CUST_TABLES_X_LOC,\
+                        *(uint8 *)CYREG_FLSHID_CUST_TABLES_WAFER_NUM,\
+                        *(uint8 *)CYREG_FLSHID_CUST_TABLES_LOT_LSB,\
+                        *(uint8 *)CYREG_FLSHID_CUST_TABLES_LOT_MSB,\
+                        *(uint8 *)CYREG_FLSHID_CUST_TABLES_WRK_WK,\
+                        *(uint8 *)CYREG_FLSHID_CUST_TABLES_FAB_YR);
+                    
+                    while (0u == USBUART_CDCIsReady());
+                    USBUART_PutData( (uint8 *)pseudoid , strlength);
+                    
+                }
+                
+                // 9) Get the binary data from the two uint16 ADC buffers
                 if ( buffer[0] == KEY_SEND_BYTE_DAT )
                 {
                     uint8 * adc1_ptr = (uint8 *) (signal_adc_1);
