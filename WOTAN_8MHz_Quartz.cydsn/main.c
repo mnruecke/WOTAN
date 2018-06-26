@@ -28,7 +28,7 @@
 #include <string.h>
 #include <math.h>
 
-char  version[3] = "1.0";
+char  version[3] = "1.1";
 
 
 #define  TRUE               1
@@ -48,6 +48,9 @@ char  version[3] = "1.0";
 
 #define  KEY_VERSION         'V'
 #define  KEY_SERIAL_NUMBER   'S'
+
+#define  KEY_VDAC_1V         'l'
+#define  KEY_VDAC_4V         'h'
 
 
 #define  KEY_SET_PARAMS      't'
@@ -432,7 +435,23 @@ void usbfs_interface(void)
                 // 3) reset firmware 
                 if ( buffer[0] == KEY_RESET )
                     CySoftwareReset(); // If Putty is used: this ends the session!
-                // 4) set new parameters
+                // 4) set VDAC output range to 1V (default, voltage DACs only, comment code out when using current DACs)
+                if ( buffer[0] == KEY_VDAC_1V )
+                {
+                    IDAC8_1_SetRange( IDAC8_1_RANGE_1V );
+                    IDAC8_2_SetRange( IDAC8_1_RANGE_1V );
+                    IDAC8_3_SetRange( IDAC8_1_RANGE_1V );
+                    IDAC8_4_SetRange( IDAC8_1_RANGE_1V );                    
+                }
+                // 5) set VDAC output range to 4V (voltage DACs only, comment code out when using current DACs)
+                if ( buffer[0] == KEY_VDAC_4V )
+                {
+                    IDAC8_1_SetRange( IDAC8_1_RANGE_4V );
+                    IDAC8_2_SetRange( IDAC8_1_RANGE_4V );
+                    IDAC8_3_SetRange( IDAC8_1_RANGE_4V );
+                    IDAC8_4_SetRange( IDAC8_1_RANGE_4V );                    
+                }
+                // 6) set new parameters
                 if ( buffer[0] == KEY_WRITE_SEQUENCE )
                 {
                     // get parameters:
@@ -449,26 +468,26 @@ void usbfs_interface(void)
                         FLASH_Write( (uint8*)signal_adc_1, twMPI->flash_ptr[channel_number], number_of_samples);
                     }
                 }
-                // 5) Use gpio P3[0] as trigger output
+                // 7) Use gpio P3[0] as trigger output
                 if ( buffer[0] == KEY_TRIGGER_OUT )             
                 { 
                     CompTrigger_Stop();
                     enableTrigOut_Write( TRIGGER_OUT_TRUE );
                 }
-                // 6) Use gpio P3[0] as trigger input
+                // 8) Use gpio P3[0] as trigger input
                 if ( buffer[0] == KEY_TRIGGER_IN )             
                 { 
                     CompTrigger_Start();
                     enableTrigOut_Write( TRIGGER_OUT_FALSE );
                 }     
-                // 7) Firmware information
+                // 9) Firmware information
                 
                 if ( buffer[0] == KEY_VERSION )
                 {
                     while (0u == USBUART_CDCIsReady());
                     USBUART_PutData( (uint8 *) version , 3);
                 }
-                // 8) Chip information
+                // 10) Chip information
                 int strlength = 34;
                 char pseudoid[strlength];
                 if ( buffer[0] == KEY_SERIAL_NUMBER )
@@ -488,7 +507,7 @@ void usbfs_interface(void)
                     
                 }
                 
-                // 9) Get the binary data from the two uint16 ADC buffers
+                // 11) Get the binary data from the two uint16 ADC buffers
                 if ( buffer[0] == KEY_SEND_BYTE_DAT )
                 {
                     uint8 * adc1_ptr = (uint8 *) (signal_adc_1);

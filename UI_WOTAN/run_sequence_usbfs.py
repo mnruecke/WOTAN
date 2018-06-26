@@ -70,17 +70,22 @@ nameDataFiles    = 'data'  # save data to files with continuous numbering (ascii
 p_run_sequ  = b'r'
 p_get_data  = b'o'
 p_trig_dir  = b'x' # "Trigger direction", Values: 'x', 'y', 'x' use P3.0 as trigger output, 'y': use P3.0 as Trigger input
+p_dac_range = b'l' # setting DAC output voltage range: 'l' for 0...1V ([l]ow; 'h' for 0...4V ([h]igh)
 
 # 1) start measurement on PSoC and get data
 try: # open and interact with serial port 
     ser = serial.Serial( com_port, baudrate, timeout=time_out)
     
     start = timeit.default_timer()
-#   run MPI sequence on pso
-    ser.write( b'5' )
+#   a) send basic sequence setup parameters
+    ser.write( b'5' ) # (default: '5' -> for measuring signal between P0.7 and P0.6)
     time.sleep(0.001)
     ser.write( p_trig_dir )
     time.sleep(0.001)
+    ser.write( p_dac_range )
+    time.sleep(0.001)
+    
+    # b) run sequence 
     ser.write( p_run_sequ )
     time.sleep(0.030) # time between trigger and end of data acquisition
     ser.flushInput()
@@ -88,7 +93,7 @@ try: # open and interact with serial port
     ser.write( p_get_data )
     time.sleep(0.001)
     
-    # get data as byte stream 
+    # c) get data as byte stream 
     adc_data_bin = ser.read(60*1000) #ser.read(bufInputSize)
     stop = timeit.default_timer()
     # transform byte stream into int16 array

@@ -100,12 +100,15 @@ The time between the **r** and the **o** command must be at least *30ms*
 - **x** Sets the trigger channel as an output (default)
 - **y** Sets the trigger channel as an input (not advisable since there is at least *10ns* trigger jitter)
 
+- **l** (**l**ow) sets the DAC output range of all four channels to 0...1 V (default)
+- **h** (**h**igh) sets the DAC output range of all four channels to 0...4 V
+
 - **V** gives out the Version number of the firmware (ascii format)
 - **S** gives out a unique chip identification number (7 numbers ranging from 0..255 and in ascii format, each separated by a space)
 
 - **1**-**4** Routes the output of channel 1-4 directly to the ADC internally, so the device can be tested with the PSoC only without exteral hardware.
 
-- **5** ADC is not connected internally so an external source can be used (default mode)
+- **5** ADC is not connected internally so an external source can be used (default mode, signal is measured between the two GPIO pins P0.6 and P0.7)
 
 
 
