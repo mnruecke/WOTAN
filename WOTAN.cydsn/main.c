@@ -28,7 +28,7 @@
 #include <string.h>
 #include <math.h>
 
-char  version[3] = "1.1";
+char  version[3] = "1.2";
 
 
 #define  TRUE               1
