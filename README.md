@@ -96,7 +96,6 @@ The WOTAN firmware can be controlled via the following ascii characters that hav
 The time between the **r** and the **o** command must be at least *30ms*
 
 
-
 - **x** Sets the trigger channel as an output (default)
 - **y** Sets the trigger channel as an input (not advisable since there is at least *10ns* trigger jitter)
 
@@ -110,6 +109,14 @@ The time between the **r** and the **o** command must be at least *30ms*
 
 - **5** ADC is not connected internally so an external source can be used (default mode, signal is measured between the two GPIO pins P0.6 and P0.7)
 
+- **l** (**L**ow) sets the range of the DACs to 0-1V
+- **h** (**H**high) sets the range of the DACs to 0-4V
+
+- **e** (R**e**set) Software reset
+
+- **s** (Run and **S**how) Does the measurement and sends the measurement result via the UART interface
+- **a** (Run and Next) Does the measurement and routes the ADC to the next DAC Output (see **1**-**5**). No output.
+- **d** (Ascii **D**ata) Sends the measurement result as Ascii via the UART interface
 
 
 
