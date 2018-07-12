@@ -53,14 +53,16 @@
 
 """ --- Required parameters ---- """ 
 # A) check device manager to see at which port number the board enumerates
-serialPort = '\\\\.\\COM4' 
+serialPort = '\\\\.\\COM11' 
 
-# B) uncomment line with the channel that is to be observed:
+# B) baudrate
+baudrate = 921600
+# C) uncomment line with the channel that is to be observed:
 #channel = b'1'  # show output of DAC 1
 #channel = b'2'  # show output of DAC 2
 #channel = b'3'  # show output of DAC 3
 #channel = b'4'  # show output of DAC 4
-channel = b'5'  # show signal voltage between GPIO P0.6 (-) and GPIO P0.7 (+)
+channel = b'2'  # show signal voltage between GPIO P0.6 (-) and GPIO P0.7 (+)
 """ ----------------------------- """
 
 
@@ -75,43 +77,48 @@ import os.path
 import numpy as np
 import matplotlib.pyplot as plt
 
-""" 0) main settings """
-# 0.1) serial port
-com_port       = serialPort
-baudrate       = 115200
-time_out       = 10
 
-# 0.2 sequence details
+
+""" main settings """
+# serial port
+time_out       = 10
+nameDataFiles  = 'mpi_data' 
+
+# sequence details
 bytesPerSample = 2
 timePerSample  = 0.0005 # sample time in ms
 sequDuration   = 15 # sequence duration in ms
 numOfSamples   = int(sequDuration/timePerSample)
 bufInputSize   = numOfSamples * bytesPerSample
+adcVoltPerBit    = 0.0005 # scaling factor for ADC data
 
-nameDataFiles  = '3D_mpi_data' 
+# list of commands defined in WOTAN
+p_run_sequ  = b'r' # starts the sequence
+p_get_data  = b'o' # ask for the binary ADC data
+p_trig_dir  = b'x' # setting the trigger to output
+p_dac_range = b'l' # setting DAC output voltage range: 'l' for 0...1V ([l]ow; 'h' for 0...4V ([h]igh)
 
 """ END - main settings """
 
 
-# 0.4) list of commands defined in WOTAN
-p_sel_chan  = channel # default: '5' (measure signal between GPIO 0.6 and 0.7), '1'..'4': get DAC output 1..4 
-p_run_sequ  = b'r'
-p_get_data  = b'o'
-p_reset     = b'e'
 
-# 1) start measurement on PSoC and get data
+""" start measurement on PSoC and get data """
 try: # open and interact with serial port 
-    ser = serial.Serial( com_port, baudrate, timeout=time_out)
-    
+    ser = serial.Serial( serialPort, baudrate, timeout=time_out)
     # run MPI sequence on psoc
-    ser.write( p_sel_chan )
-    time.sleep(0.3)
+    ser.write( b'2' )
+    time.sleep(0.001)
+    ser.write( p_trig_dir )
+    time.sleep(0.001)
+    ser.write( p_dac_range )
+    time.sleep(0.001)
+    
     ser.write( p_run_sequ )
-    time.sleep(0.3)
+    time.sleep(0.030)
     ser.flushInput()
-    time.sleep(0.3)
+    time.sleep(0.01)
     ser.write( p_get_data )
-    time.sleep(0.3)
+    time.sleep(0.01)
     
     # get data as byte stream 
     adc_data_bin = ser.read(bufInputSize)
@@ -123,7 +130,7 @@ finally: # close serial port
 
 
 if len(adc_data_bin) == numOfSamples*bytesPerSample: # check if run was successful
-    # 3) data correction routines:
+    #  data correction routines:
     # find and correct scaling difference between ADC 1 (even samples)
     # and ADC 2 (odd samples)
     # (this method fails if signal has steps or goes into saturation!)
@@ -139,16 +146,16 @@ if len(adc_data_bin) == numOfSamples*bytesPerSample: # check if run was successf
     adc_data_corr[0::2] = adc_data_corr[0::2] *(1-adc1DIVadc2)
     adc_data_corr[1::2] = adc2
         
-    # 4) visualize data
+    # visualize data
     dat_time = np.arange(0,sequDuration,timePerSample)
-    dat_sig  = adc_data_corr
+    dat_sig  = adc_data_corr * adcVoltPerBit
     plt.plot( dat_time, dat_sig, dat_time, dat_sig,'+')
     plt.xlabel('time [ms]')
-    plt.ylabel('signal [a.u.]')
+    plt.ylabel('signal [V]')
     plt.show()  
     
     
-    # 5) save data as ascii table
+    #  save data as ascii table
     # write data in file with continuous numbering
     cnt = 0
     data_file_name = nameDataFiles + '_' + str(cnt) + '.txt'
@@ -160,6 +167,7 @@ if len(adc_data_bin) == numOfSamples*bytesPerSample: # check if run was successf
             f.write("%s\n" % int(dat))
         print( 'Data written to: ' + data_file_name +
               '  (' + str(len(adc_data_int16)) + ' samples)')
+        
 else:
     print("\n\n\nPSoC doesn't seem ready. Please try again. " +\
           "(WOTAN firmware requires approx. 5 sec. after " +\
