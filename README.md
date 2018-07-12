@@ -62,17 +62,17 @@ Python script that allows to start a sequence and to receive the data of the rec
 The *com_port* variable must be adapted to the Port of the PSoC on the computer which can be found in Windows under *Device Manager*. The script plots the data and saves the data as ascii table with continuous numbering in the same folder as the script.
 
 ## controll WOTAN with arbitrary software
-Commands via usbfs or UART interface
+Commands via usbfs or UART interface.
 
-- 1) Send **1**,**2**,**3**,**4** or **5** to select the input channel of the ADC. **1**-**4** connects the output of ADC 1-4 directly to the ADC whereas **5** (default setting) the ADC measures the external signal between GPIO P0[6] and P0[7].
+- (1) Send **1**,**2**,**3**,**4** or **5** to select the input channel of the ADC. **1**-**4** connects the output of ADC 1-4 directly to the ADC whereas **5** (default setting) the ADC measures the external signal between GPIO P0[6] and P0[7].
 
-- 2) **r** (**r**un) start the sequence and measures the ADC values
+- (2) **r** (**r**un) start the sequence and measures the ADC values
 
-- 3) **e** (r**e**set) resets the firmware
+- (3) **e** (r**e**set) resets the firmware
 
-- 4) **l** (**l**ow output) sets the max value of the DACs to 1V
+- (4) **l** (**l**ow output) sets the max value of the DACs to 1V
 
-- 5) **h** (**h**igh output) sets the max value of the DACs to 4V
+- (5) **h** (**h**igh output) sets the max value of the DACs to 4V
 
 - 6) **p** (**p**rogramm)
 
