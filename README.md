@@ -61,4 +61,56 @@ The sequence starts with a ramp up and ends with a ramp down interval
 Python script that allows to start a sequence and to receive the data of the receive channel via the fast USBFS interface.
 The *com_port* variable must be adapted to the Port of the PSoC on the computer which can be found in Windows under *Device Manager*. The script plots the data and saves the data as ascii table with continuous numbering in the same folder as the script.
 
+## controll WOTAN with arbitrary software
+Commands via usbfs or UART interface
+
+- 1) Send **1**,**2**,**3**,**4** or **5** to select the input channel of the ADC. **1**-**4** connects the output of ADC 1-4 directly to the ADC whereas **5** (default setting) the ADC measures the external signal between GPIO P0[6] and P0[7].
+
+- 2) **r** (**r**un) start the sequence and measures the ADC values
+
+- 3) **e** (r**e**set) resets the firmware
+
+- 4) **l** (**l**ow output) sets the max value of the DACs to 1V
+
+- 5) **h** (**h**igh output) sets the max value of the DACs to 4V
+
+- 6) **p** (**p**rogramm)
+
+To write an arbitrary sequence with a length of 3x3750 to the PSoc the **p** character is used. 
+  A sequence consist of three parts
+  * A ramp up sequence (3750 samples)
+  * The actual sequence that is going to be measured (3750 samples)
+  * A ramp down sequence (3750 samples)
+  
+  The ADC of the PSoC measures only during the actual sequence.  
+  
+  The sequence must be sent consecutively for each channel. Therefore the sequence for one channel must be diveded into packages  that consist of a 8 bit **header** and 32 bit of **data**. 
+  The **header** must have the following form 
+  * ascii character **'p'**=112
+  * **1-4** for the channel 
+  * Two bytes for the package number starting with the high byte
+  * Two bytes for the total number of packages per channel (number of samples per channel/32) starting with the high byte
+  * not used (e.g. 0)
+  * not used (e.g. 0)
+  
+  So a total package looks for example like this
+  ('p', 2, 0x01, 0x5F, 0x01, 0x60, '0', '0',   1, 2, 4, ...... , 4, 2, 1)  
+  This example shows the package with package number 0x015F (=351) of total 0x0160 (=352) packages with the data 1, 2, 4, ..... , 4, 2, 1 for channel 2.
+
+- 7) **x** use GPIO P3[0] as trigger output
+
+- 8) **y** use GPIO P3[0] as trigger input
+
+- 9) **V** (**V**ersion) returns the version of the firmware via the interface the command was sent
+
+- 10) **S** (**S**erial number) returns the serial number of the chip via the interface the command was sent
+
+- 11) **o** (**o**rder data) orders the binary data from the last ADC measurement via the interface the command was sent.
+The data stream consists out of the interleaved data from ADC1 and ADC2.
+
+- 12) **d** (**d**ebug data) returns the data from the last measurement as ASCII via the UART interface
+
+- 13) **s** (run and **s**how) first command 2) then command 12)
+
+- 14) **a** command 2) and then the ADC switches to the next input (see command 1))
 
