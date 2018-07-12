@@ -74,7 +74,7 @@ Commands via usbfs or UART interface.
 
 - (5) **h** (**h**igh output) sets the max value of the DACs to 4V
 
-- 6) **p** (**p**rogramm)
+- (6) **p** (**p**rogramm)
 
 To write an arbitrary sequence with a length of 3x3750 to the PSoc the **p** character is used. 
   A sequence consist of three parts
@@ -97,20 +97,20 @@ To write an arbitrary sequence with a length of 3x3750 to the PSoc the **p** cha
   ('p', 2, 0x01, 0x5F, 0x01, 0x60, '0', '0',   1, 2, 4, ...... , 4, 2, 1)  
   This example shows the package with package number 0x015F (=351) of total 0x0160 (=352) packages with the data 1, 2, 4, ..... , 4, 2, 1 for channel 2.
 
-- 7) **x** use GPIO P3[0] as trigger output
+- (7) **x** use GPIO P3[0] as trigger output
 
-- 8) **y** use GPIO P3[0] as trigger input
+- (8) **y** use GPIO P3[0] as trigger input
 
-- 9) **V** (**V**ersion) returns the version of the firmware via the interface the command was sent
+- (9) **V** (**V**ersion) returns the version of the firmware via the interface the command was sent
 
-- 10) **S** (**S**erial number) returns the serial number of the chip via the interface the command was sent
+- (10) **S** (**S**erial number) returns the serial number of the chip via the interface the command was sent
 
-- 11) **o** (**o**rder data) orders the binary data from the last ADC measurement via the interface the command was sent.
+- (11) **o** (**o**rder data) orders the binary data from the last ADC measurement via the interface the command was sent.
 The data stream consists out of the interleaved data from ADC1 and ADC2.
 
-- 12) **d** (**d**ebug data) returns the data from the last measurement as ASCII via the UART interface
+- (12) **d** (**d**ebug data) returns the data from the last measurement as ASCII via the UART interface
 
-- 13) **s** (run and **s**how) first command 2) then command 12)
+- (13) **s** (run and **s**how) first command 2) then command (12)
 
-- 14) **a** command 2) and then the ADC switches to the next input (see command 1))
+- (14) **a** command (2) and then the ADC switches to the next input (see command (1))
 
