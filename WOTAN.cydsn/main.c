@@ -91,7 +91,7 @@ char  version[3] = "1.3";
 #define  N_TDS_ADC          20
 #define  N_TDS_DAC          3               // TD1: on ramp, TD2: sequence (each with length NSAMPLES_DAC)
 
-#define  FLASH_CH1          (const uint8 *)     0x08000  // Flash addresses for storing the DAC wave forms
+#define  FLASH_CH1          (const uint8 *)     0x0A000  // Flash addresses for storing the DAC wave forms
 #define  FLASH_CH2          (const uint8 *)     0x10000
 #define  FLASH_CH3          (const uint8 *)     0x20000
 #define  FLASH_CH4          (const uint8 *)     0x30000 
