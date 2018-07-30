@@ -32,10 +32,10 @@
 
 """ --- Required parameters ---- """ 
 # A) check device manager to see at which port number the board enumerates
-serialPort = '\\\\.\\COM11' 
+serialPort = '\\\\.\\COM18' 
 
 # B) baudrate
-baudrate = 921600
+baudrate = 1382400
 # C) uncomment line with the channel that is to be observed:
 #channel = b'1'  # show output of DAC 1
 #channel = b'2'  # show output of DAC 2
@@ -79,7 +79,7 @@ len_data = 32
 
 
 """ generate sequence """
-f = frequency_scale*np.asarray([11690,11690,0,0])                    # frequency in Hz
+f = frequency_scale*np.asarray([11690,11690,1110,2220])                    # frequency in Hz
 f_mod = frequency_scale*np.asarray([0.0,0,0,0])                      # modulated frequency in Hz
 phi = np.asarray([0,90,0,0])                                         # phase in degree
 phi_mod = np.asarray([90,90,90,90])                                  # modulated phase in degree
@@ -132,7 +132,8 @@ try:
     # calculating the number of packages
     num_packages = int (np.ceil(nsamples_total / len_data)) # number of full packages    
         
-    for channel in range(num_channels):
+    for channel in [0,1,2,3]:
+        time.sleep(0.05) # delay for avoiding bluetooth buffer overrun
         for package in range(num_packages):
             
             #header
@@ -160,6 +161,8 @@ try:
             if interface == "USBFS":
                 time.sleep(0.0001)
 
+            if interface == "UART":
+                time.sleep(0.002) # delay for avoiding bluetooth buffer overrun
 
 finally:
     ser.close()

@@ -573,7 +573,7 @@ void uart_interface(void)
                     UART_1_PutChar(signal_adc_2[j] >>8   );
                     UART_1_PutChar(signal_adc_2[j] &0xFF );  
                     
-                    
+                    CyDelayUs(350); // delay added for avoiding bluetooth buffer overrun
                 }
                 LED_Write( 0u );
             }// END send binary adc data
@@ -676,6 +676,8 @@ void display_results(void)
         sprintf(sms,"ADC_2 Value %d,5 us:\t  %d", i, signal_adc_2[i]);
             UART_1_PutString(sms);
         UART_1_PutCRLF(1);
+        
+        CyDelay(3); // delay for avoiding bluetooth buffer overrun
         
         // stop printing ascii table with any key:
         if( UART_1_GetRxBufferSize() != 0 )
