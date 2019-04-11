@@ -7,19 +7,15 @@ Firmware and scripts for running a control unit of a 3D MPI scanner. It is based
 The MPI scanner control module has 4 transmit channels (4x 250 kS/s, 8 bit, up to 4 MS/s possible) and one receive channel (2 MS/s, 12 bit). Recording time: 15 ms. Data transfer over USB-to-UART with 115200 Baud. The onboard programmer allows higher transfer rates with precise clock adjustments. Using the USBFS component included on the PSoC allows up to 12.5 Mbps (micro B connector). The common HC-05 bluetooth module can also be connected to the control unit (up to 1.3 Mbps).
 
 ## Getting Started
-1. For programming the module, Creator 4.1 or higher is necessary, which can be downloaded for free from Cypress Semiconductor (www.cypress.com).
+1. For programming the module, Creator 4.1 or higher is necessary, which can be downloaded for free from Cypress Semiconductor (www.cypress.com). The pdf-file *WOTAN_schematics.pdf* shows a block file generated with this software. The Creator IDE allows hardware programming via block diagrams. The main purpose of the pdf-file is to show the pin-mapping and which external components are needed. 
 
-2. Opening the workspace "WOTAN" contains one project with the same name. The default configuration requires an external oscillator crystal to run. The default value is set to 8 MHz and a load capacitance of about 33 pF. It is possible to change this value between the range 4 MHz ... 25 MHz. This is done by opening the tab *WOTAN.cydwr*, choose the bottom tab called *clocks*, click somewhere in the spread sheet. A pop-up window appears which contains a blue box with the header "XTAL". There you can adjust the values for a different crystal.
-
-It is possible to run the board without an external crytal. This allows running the board without any external components but is only recommendable for debugging purposes, since the internal oscillator has an accuracy of only ~0.25%, a typical crystal has an accuracy of < 0.005%. Changing to the internal oscillator is done in the same pop-up window from above. Click on the box with the title *PLL* and choose *IMO (24 MHz)* instead of *XTAL* and then rebuild and programm the board (CTRL + 5).  
-
-No wave forms are defined after programming the board (and old ones are overwritten after reprogramming). Arbitrary wave forms can be generated and transfered to the PSoC via the USBFS using the *.\UI\_WOTAN\\generate\_sequency.py* Python script. 
+2. Opening the workspace "WOTAN" contains one project with the same name. The default configuration requires an external oscillator crystal to run. The default value is set to 8 MHz and a load capacitance of about 33 pF. It is possible to change this value between the range 4 MHz ... 25 MHz. This is done by opening the tab *WOTAN.cydwr*, choose the bottom tab called *clocks*, click somewhere in the spread sheet. A pop-up window appears which contains a blue box with the header "XTAL". There you can adjust the values for a different crystal. It is possible to run the board without an external crytal. This allows running the board without any external components but is only recommendable for debugging purposes, since the internal oscillator has an accuracy of only ~0.25%, a typical crystal has an accuracy of < 0.005%. Changing to the internal oscillator is done in the same pop-up window from above. Click on the box with the title *PLL* and choose *IMO (24 MHz)* instead of *XTAL* and then rebuild and programm the board (CTRL + 5). No wave forms are defined after programming the board (and old ones are overwritten after reprogramming). Arbitrary wave forms can be generated and transfered to the PSoC via the USBFS using the *.\UI\_WOTAN\\generate\_sequency.py* Python script. 
 
 3. For writing the firmware to the chip connect programmer to the PSoc and the PC via USB port, select *WOTAN* as active project (right mouse click) and press CTRL-F5 for compiling and programming. 
 
 4. Open the device manager in windows in order to see as which com-port the USBUART of the onboard programmer enumerates.
 
-5. Start *putty.exe* or any hyperterminal of your choice and connect it to this com-port number. The baudrate is 115200.
+5. Start *putty.exe* or any hyperterminal of your choice and connect it to this com-port number. The baudrate value can be left at e.g. 9600 since it does not affect virtual com-ports. 
 
 6. Pressing the reset button on the programmer or pressing 'e' in the hyperterminal resets the programm and all available options are shown in the hyperterminal
 
@@ -45,7 +41,7 @@ In Windows 7 it might be necessary to add the driver manually. Open the *Device 
 In Windows 10 it is typically recognized automatically and enumerated as a virtual com port.
 In Linux, the USBUART component should also be recognized automatically and appear in /dev/ e.g. as */dev/ttyACM0*, i.e. the *com_port* variable in the python scripts mentioned below needs to be set as *com_port = '/dev/ttyACM0'* in this example. Linux doesn't grand access rights per default. This can be changed e.g. with *sudo chmod 777 /dev/ttyACM0*. 
 
-## .\\UI\_WOTAN\\generate\_sequency\_usbfs.py
+## .\\UI\_WOTAN\\generate\_sequency.py
 Python script that allows to send an arbitrary sequence to the PSoc with Firmware *WOTAN* via the fast USBFS interface, so no programmer is needed to change the sequence.
 The *com_port* variable must be adapted to the Port of the PSoC on the computer which can be found in Windows under *Device Manager*.
 It is possible to generate a sequence for each output channel in the form  
