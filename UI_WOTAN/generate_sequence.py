@@ -32,7 +32,7 @@
 
 """ --- Required parameters ---- """ 
 # A) check device manager to see at which port number the board enumerates
-serialPort = '\\\\.\\COM18' 
+serialPort = '\\\\.\\COM8' 
 
 # B) baudrate
 baudrate = 1382400
