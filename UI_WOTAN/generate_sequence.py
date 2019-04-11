@@ -44,8 +44,8 @@ baudrate = 1382400
 channel = b'2'  # show signal voltage between GPIO P0.6 (-) and GPIO P0.7 (+)
 
 # D) uncomment the used interface
-interface = "UART"
-#interface = "USBFS"
+#interface = "UART"
+interface = "USBFS"
 """ ----------------------------- """
 
 import serial
@@ -56,7 +56,7 @@ import time
 
 """ main settings """
 #  serial port
-time_out = 1                # [s]; this script should retrieve the 60 kB data in << 1s
+time_out = 10                # [s]; this script should retrieve the 60 kB data in << 1s
 
 #  channel settings
 num_channels = 4            # number of channels

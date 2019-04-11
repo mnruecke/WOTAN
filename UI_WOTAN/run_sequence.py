@@ -53,7 +53,7 @@
 
 """ --- Required parameters ---- """ 
 # A) check device manager to see at which port number the board enumerates
-serialPort = '\\\\.\\COM8' 
+serialPort = '\\\\.\\COM22' # USBFS 8; UART 22 
 
 # B) baudrate
 baudrate = 1382400#921600
@@ -106,7 +106,7 @@ p_dac_range = b'l' # setting DAC output voltage range: 'l' for 0...1V ([l]ow; 'h
 try: # open and interact with serial port 
     ser = serial.Serial( serialPort, baudrate, timeout=time_out)
     # run MPI sequence on psoc
-    ser.write( b'2' )
+    ser.write( b'5' )
     time.sleep(0.001)
     ser.write( p_trig_dir )
     time.sleep(0.001)

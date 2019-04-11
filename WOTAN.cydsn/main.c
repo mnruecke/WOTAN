@@ -30,7 +30,7 @@ generate sequence UART
 #include <string.h>
 #include <math.h>
 
-char  version[3] = "1.3";
+char  version[3] = "1.4";
 
 
 #define  TRUE               1

@@ -7,9 +7,7 @@
 <wrkspc_folders />
 <files />
 <projects>
-<v>.\WOTAN_PULSE.cydsn\WOTAN_PULSE.cyprj</v>
 <v>.\WOTAN.cydsn\WOTAN.cyprj</v>
-<v>.\WOTAN_8MHz_Quartz.cydsn\WOTAN_8MHz_Quartz.cyprj</v>
 </projects>
 <workspace_id v="46661059-1e5b-4d09-9254-de2e06c97fd0" />
 <WriteAppVersionLastSavedWith v="4.2.0.641" />

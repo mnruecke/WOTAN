@@ -9,11 +9,11 @@ The MPI scanner control module has 4 transmit channels (4x 250 kS/s, 8 bit, up t
 ## Getting Started
 1. For programming the module, Creator 4.1 or higher is necessary, which can be downloaded for free from Cypress Semiconductor (www.cypress.com).
 
-2. Opening the workspace "WOTAN" shows two projects.
-*WOTAN* is the version used for the TWMPI scanner. It uses the internal oscillator ("IMO") by default and therefore runs without adding an external crystal.
-Yet it is highly recommended to add an external oscillator crystal (the accuracy of the chip intern oscillator is only ~0.25% and shows a strong temperature dependence).
-Arbitrary sequences can be generated and transfered to the PSoC via the USBFS using the *.\UI\_WOTAN\\generate\_sequency\_usbfs.py* Python script. *WOTAN_8MHz_Quartz* is identical with *WOTAN* but requires an external 8 MHz crytal by default. 
-*WOTAN_PULSE* is a version that contains only the receive chain and a trigger output.
+2. Opening the workspace "WOTAN" contains one project with the same name. The default configuration requires an external oscillator crystal to run. The default value is set to 8 MHz and a load capacitance of about 33 pF. It is possible to change this value between the range 4 MHz ... 25 MHz. This is done by opening the tab *WOTAN.cydwr*, choose the bottom tab called *clocks*, click somewhere in the spread sheet. A pop-up window appears which contains a blue box with the header "XTAL". There you can adjust the values for a different crystal.
+
+It is possible to run the board without an external crytal. This allows running the board without any external components but is only recommendable for debugging purposes, since the internal oscillator has an accuracy of only ~0.25%, a typical crystal has an accuracy of < 0.005%. Changing to the internal oscillator is done in the same pop-up window from above. Click on the box with the title *PLL* and choose *IMO (24 MHz)* instead of *XTAL* and then rebuild and programm the board (CTRL + 5).  
+
+No wave forms are defined after programming the board (and old ones are overwritten after reprogramming). Arbitrary wave forms can be generated and transfered to the PSoC via the USBFS using the *.\UI\_WOTAN\\generate\_sequency.py* Python script. 
 
 3. For writing the firmware to the chip connect programmer to the PSoc and the PC via USB port, select *WOTAN* as active project (right mouse click) and press CTRL-F5 for compiling and programming. 
 
@@ -38,7 +38,7 @@ Arbitrary sequences can be generated and transfered to the PSoC via the USBFS us
 The folder *.\\UI_WOTAN* contains two python scripts for creating and running sequences.
 The Firmware for the PSoC Chip allows to transfer an arbitrary sequence via the USBFS interface (see *.\\UI\_WOTAN\\generate_sequence_usbfs.py*). 
 The sequence is then stored in the Flash. On first startup after loading the firmware to PSoC it generates an default sequence.
-The PSoc can be controlled using the Python script *.\\UI\_WOTAN\\run_sequence_usbfs.py*. 
+The PSoc can be controlled using the Python script *.\\UI\_WOTAN\\run_sequence.py*. 
 
 ## Using the fast USBUART component (micro-B connector) in Windows 7, Windows 10 and Linux
 In Windows 7 it might be necessary to add the driver manually. Open the *Device Manager* and find the USBUART interface in the **Other Devices** category. Open the context menu and select *Update Driver Software*. Select the *USBUART_cdc.inf* file in the root directory. It should then enumerate as a virtual com port.
@@ -62,7 +62,7 @@ where
 
 The sequence starts with a ramp up and ends with a ramp down interval
 
-## .\\UI\_WOTAN\\run\_sequence\_usbfs.py
+## .\\UI\_WOTAN\\run\_sequence.py
 Python script that allows to start a sequence and to receive the data of the receive channel via the fast USBFS interface.
 The *com_port* variable must be adapted to the Port of the PSoC on the computer which can be found in Windows under *Device Manager*. The script plots the data and saves the data as ascii table with continuous numbering in the same folder as the script.
 
