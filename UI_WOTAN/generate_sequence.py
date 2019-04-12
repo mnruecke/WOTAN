@@ -60,9 +60,9 @@ time_out = 10                # [s]; this script should retrieve the 60 kB data i
 
 #  channel settings
 num_channels = 4            # number of channels
-nsamples_ramp_up = 3750     # number of steps for the ramp up sequence
-nsamples_sequence = 3750    # number of steps for the actual sequence
-nsamples_ramp_down = 3750   # number of steps for the ramp up sequence
+nsamples_ramp_up = 3750*2    # number of steps for the ramp up sequence
+nsamples_sequence = 3750*2   # number of steps for the actual sequence
+nsamples_ramp_down = 3750*2   # number of steps for the ramp up sequence
 nsamples_total = nsamples_ramp_up + nsamples_sequence + nsamples_ramp_down  # total number of steps
 
 max_value = 255     

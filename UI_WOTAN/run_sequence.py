@@ -53,7 +53,7 @@
 
 """ --- Required parameters ---- """ 
 # A) check device manager to see at which port number the board enumerates
-serialPort = '\\\\.\\COM22' # USBFS 8; UART 22 
+serialPort = '\\\\.\\COM8' # USBFS 8; UART 22 
 
 # B) baudrate
 baudrate = 1382400#921600
@@ -99,6 +99,7 @@ p_trig_dir  = b'x' # setting the trigger to output
 p_dac_range = b'l' # setting DAC output voltage range: 'l' for 0...1V ([l]ow; 'h' for 0...4V ([h]igh)
 
 """ END - main settings """
+
 
 
 

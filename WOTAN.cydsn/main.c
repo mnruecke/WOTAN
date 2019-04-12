@@ -37,7 +37,7 @@ generate sequence UART
 #include <string.h>
 #include <math.h>
 
-char  version[3] = "1.4"; 
+char  version[3] = "1.5"; 
 
 
 #define  TRUE               1
@@ -89,14 +89,14 @@ char  version[3] = "1.4";
 #define  TRIGGER_OUT_TRUE    1
 #define  TRIGGER_OUT_FALSE   0
 
-#define  NSAMPLES_ADC       15000               // 1 MS/s, max value: 15000
-#define  NSAMPLES_DAC       NSAMPLES_ADC/4      // 250 kS/s (make sample duration for Transmit and Receive the same)
+#define  NSAMPLES_ADC       15000               // 1 MS/s, max value: 15000 per ADC (2 ADS running interleaved)
+#define  NSAMPLES_DAC       NSAMPLES_ADC/4      // 500 kS/s (make sample duration for Transmit and Receive the same)
 #define  SEQU_DURATION_US   NSAMPLES_ADC*3      // duration includes start- and end ramp
 
 #define  IGNORE_FIRST_PART  TRUE               // if FALSE: shows start ramp of sequence (default: TRUE)
 
 #define  N_TDS_ADC          20
-#define  N_TDS_DAC          3               // TD1: on ramp, TD2: sequence (each with length NSAMPLES_DAC)
+#define  N_TDS_DAC          6               // TD1: on ramp, TD2: sequence (each with length NSAMPLES_DAC)
 
 #define  FLASH_CH1          (const uint8 *)     0x0A000  // Flash addresses for storing the DAC wave forms
 #define  FLASH_CH2          (const uint8 *)     0x10000
@@ -758,13 +758,22 @@ void dma_dac_1_init(void)
         DMA_DAC_1_TD[0] = CyDmaTdAllocate();
         DMA_DAC_1_TD[1] = CyDmaTdAllocate();
         DMA_DAC_1_TD[2] = CyDmaTdAllocate();
+        DMA_DAC_1_TD[3] = CyDmaTdAllocate();
+        DMA_DAC_1_TD[4] = CyDmaTdAllocate();
+        DMA_DAC_1_TD[5] = CyDmaTdAllocate();
     }
     CyDmaTdSetConfiguration(DMA_DAC_1_TD[0], NSAMPLES_DAC, DMA_DAC_1_TD[1], CY_DMA_TD_INC_SRC_ADR);
     CyDmaTdSetConfiguration(DMA_DAC_1_TD[1], NSAMPLES_DAC, DMA_DAC_1_TD[2], CY_DMA_TD_INC_SRC_ADR);
-    CyDmaTdSetConfiguration(DMA_DAC_1_TD[2], NSAMPLES_DAC, CY_DMA_DISABLE_TD, DMA_DAC_1__TD_TERMOUT_EN | CY_DMA_TD_INC_SRC_ADR);
-    CyDmaTdSetAddress(DMA_DAC_1_TD[0], LO16((uint32)FLASH_CH1), LO16((uint32)IDAC8_1_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_1_TD[1], LO16((uint32)FLASH_CH1 + NSAMPLES_DAC), LO16((uint32)IDAC8_1_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_1_TD[2], LO16((uint32)FLASH_CH1 + 2*NSAMPLES_DAC), LO16((uint32)IDAC8_1_Data_PTR));
+    CyDmaTdSetConfiguration(DMA_DAC_1_TD[2], NSAMPLES_DAC, DMA_DAC_1_TD[3], CY_DMA_TD_INC_SRC_ADR| CY_DMA_TD_INC_SRC_ADR);
+    CyDmaTdSetConfiguration(DMA_DAC_1_TD[3], NSAMPLES_DAC, DMA_DAC_1_TD[4], CY_DMA_TD_INC_SRC_ADR);
+    CyDmaTdSetConfiguration(DMA_DAC_1_TD[4], NSAMPLES_DAC, DMA_DAC_1_TD[5], CY_DMA_TD_INC_SRC_ADR);
+    CyDmaTdSetConfiguration(DMA_DAC_1_TD[5], NSAMPLES_DAC, CY_DMA_DISABLE_TD, DMA_DAC_1__TD_TERMOUT_EN | CY_DMA_TD_INC_SRC_ADR);
+    CyDmaTdSetAddress(DMA_DAC_1_TD[0], LO16((uint32)FLASH_CH1 + 0* NSAMPLES_DAC), LO16((uint32)IDAC8_1_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_1_TD[1], LO16((uint32)FLASH_CH1 + 1* NSAMPLES_DAC), LO16((uint32)IDAC8_1_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_1_TD[2], LO16((uint32)FLASH_CH1 + 2* NSAMPLES_DAC), LO16((uint32)IDAC8_1_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_1_TD[3], LO16((uint32)FLASH_CH1 + 3* NSAMPLES_DAC), LO16((uint32)IDAC8_1_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_1_TD[4], LO16((uint32)FLASH_CH1 + 4* NSAMPLES_DAC), LO16((uint32)IDAC8_1_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_1_TD[5], LO16((uint32)FLASH_CH1 + 5* NSAMPLES_DAC), LO16((uint32)IDAC8_1_Data_PTR));
     CyDmaChSetInitialTd(DMA_DAC_1_Chan, DMA_DAC_1_TD[0]);
     CyDmaChEnable(DMA_DAC_1_Chan, 1);
 }
@@ -779,13 +788,22 @@ void dma_dac_2_init(void)
         DMA_DAC_2_TD[0] = CyDmaTdAllocate();
         DMA_DAC_2_TD[1] = CyDmaTdAllocate();
         DMA_DAC_2_TD[2] = CyDmaTdAllocate();
+        DMA_DAC_2_TD[3] = CyDmaTdAllocate();
+        DMA_DAC_2_TD[4] = CyDmaTdAllocate();
+        DMA_DAC_2_TD[5] = CyDmaTdAllocate();
     }
     CyDmaTdSetConfiguration(DMA_DAC_2_TD[0], NSAMPLES_DAC, DMA_DAC_2_TD[1], CY_DMA_TD_INC_SRC_ADR);
     CyDmaTdSetConfiguration(DMA_DAC_2_TD[1], NSAMPLES_DAC, DMA_DAC_2_TD[2], CY_DMA_TD_INC_SRC_ADR);
-    CyDmaTdSetConfiguration(DMA_DAC_2_TD[2], NSAMPLES_DAC, CY_DMA_DISABLE_TD, DMA_DAC_2__TD_TERMOUT_EN | CY_DMA_TD_INC_SRC_ADR);
-    CyDmaTdSetAddress(DMA_DAC_2_TD[0], LO16((uint32)FLASH_CH2), LO16((uint32)IDAC8_2_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_2_TD[1], LO16((uint32)FLASH_CH2 + NSAMPLES_DAC), LO16((uint32)IDAC8_2_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_2_TD[2], LO16((uint32)FLASH_CH2 + 2*NSAMPLES_DAC), LO16((uint32)IDAC8_2_Data_PTR));
+    CyDmaTdSetConfiguration(DMA_DAC_2_TD[2], NSAMPLES_DAC, DMA_DAC_2_TD[3], CY_DMA_TD_INC_SRC_ADR| CY_DMA_TD_INC_SRC_ADR);
+    CyDmaTdSetConfiguration(DMA_DAC_2_TD[3], NSAMPLES_DAC, DMA_DAC_2_TD[4], CY_DMA_TD_INC_SRC_ADR);
+    CyDmaTdSetConfiguration(DMA_DAC_2_TD[4], NSAMPLES_DAC, DMA_DAC_2_TD[5], CY_DMA_TD_INC_SRC_ADR);
+    CyDmaTdSetConfiguration(DMA_DAC_2_TD[5], NSAMPLES_DAC, CY_DMA_DISABLE_TD, DMA_DAC_2__TD_TERMOUT_EN | CY_DMA_TD_INC_SRC_ADR);
+    CyDmaTdSetAddress(DMA_DAC_2_TD[0], LO16((uint32)FLASH_CH2 + 0* NSAMPLES_DAC), LO16((uint32)IDAC8_2_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_2_TD[1], LO16((uint32)FLASH_CH2 + 1* NSAMPLES_DAC), LO16((uint32)IDAC8_2_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_2_TD[2], LO16((uint32)FLASH_CH2 + 2* NSAMPLES_DAC), LO16((uint32)IDAC8_2_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_2_TD[3], LO16((uint32)FLASH_CH2 + 3* NSAMPLES_DAC), LO16((uint32)IDAC8_2_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_2_TD[4], LO16((uint32)FLASH_CH2 + 4* NSAMPLES_DAC), LO16((uint32)IDAC8_2_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_2_TD[5], LO16((uint32)FLASH_CH2 + 5* NSAMPLES_DAC), LO16((uint32)IDAC8_2_Data_PTR));
     CyDmaChSetInitialTd(DMA_DAC_2_Chan, DMA_DAC_2_TD[0]);
     CyDmaChEnable(DMA_DAC_2_Chan, 1);
 }
@@ -800,13 +818,22 @@ void dma_dac_3_init(void)
         DMA_DAC_3_TD[0] = CyDmaTdAllocate();
         DMA_DAC_3_TD[1] = CyDmaTdAllocate();
         DMA_DAC_3_TD[2] = CyDmaTdAllocate();
+        DMA_DAC_3_TD[3] = CyDmaTdAllocate();
+        DMA_DAC_3_TD[4] = CyDmaTdAllocate();
+        DMA_DAC_3_TD[5] = CyDmaTdAllocate();
     }
     CyDmaTdSetConfiguration(DMA_DAC_3_TD[0], NSAMPLES_DAC, DMA_DAC_3_TD[1], CY_DMA_TD_INC_SRC_ADR);
     CyDmaTdSetConfiguration(DMA_DAC_3_TD[1], NSAMPLES_DAC, DMA_DAC_3_TD[2], CY_DMA_TD_INC_SRC_ADR);
-    CyDmaTdSetConfiguration(DMA_DAC_3_TD[2], NSAMPLES_DAC, CY_DMA_DISABLE_TD, DMA_DAC_3__TD_TERMOUT_EN | CY_DMA_TD_INC_SRC_ADR);
-    CyDmaTdSetAddress(DMA_DAC_3_TD[0], LO16((uint32)FLASH_CH3), LO16((uint32)IDAC8_3_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_3_TD[1], LO16((uint32)FLASH_CH3 + NSAMPLES_DAC), LO16((uint32)IDAC8_3_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_3_TD[2], LO16((uint32)FLASH_CH3 + 2*NSAMPLES_DAC), LO16((uint32)IDAC8_3_Data_PTR));
+    CyDmaTdSetConfiguration(DMA_DAC_3_TD[2], NSAMPLES_DAC, DMA_DAC_3_TD[3], CY_DMA_TD_INC_SRC_ADR);
+    CyDmaTdSetConfiguration(DMA_DAC_3_TD[3], NSAMPLES_DAC, DMA_DAC_3_TD[4], CY_DMA_TD_INC_SRC_ADR);
+    CyDmaTdSetConfiguration(DMA_DAC_3_TD[4], NSAMPLES_DAC, DMA_DAC_3_TD[5], CY_DMA_TD_INC_SRC_ADR);
+    CyDmaTdSetConfiguration(DMA_DAC_3_TD[5], NSAMPLES_DAC, CY_DMA_DISABLE_TD, DMA_DAC_3__TD_TERMOUT_EN | CY_DMA_TD_INC_SRC_ADR);
+    CyDmaTdSetAddress(DMA_DAC_3_TD[0], LO16((uint32)FLASH_CH3 + 0* NSAMPLES_DAC), LO16((uint32)IDAC8_3_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_3_TD[1], LO16((uint32)FLASH_CH3 + 1* NSAMPLES_DAC), LO16((uint32)IDAC8_3_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_3_TD[2], LO16((uint32)FLASH_CH3 + 2* NSAMPLES_DAC), LO16((uint32)IDAC8_3_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_3_TD[3], LO16((uint32)FLASH_CH3 + 3* NSAMPLES_DAC), LO16((uint32)IDAC8_3_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_3_TD[4], LO16((uint32)FLASH_CH3 + 4* NSAMPLES_DAC), LO16((uint32)IDAC8_3_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_3_TD[5], LO16((uint32)FLASH_CH3 + 5* NSAMPLES_DAC), LO16((uint32)IDAC8_3_Data_PTR));
     CyDmaChSetInitialTd(DMA_DAC_3_Chan, DMA_DAC_3_TD[0]);
     CyDmaChEnable(DMA_DAC_3_Chan, 1);
 }
@@ -821,13 +848,22 @@ void dma_dac_4_init(void)
         DMA_DAC_4_TD[0] = CyDmaTdAllocate();
         DMA_DAC_4_TD[1] = CyDmaTdAllocate();
         DMA_DAC_4_TD[2] = CyDmaTdAllocate();
+        DMA_DAC_4_TD[3] = CyDmaTdAllocate();
+        DMA_DAC_4_TD[4] = CyDmaTdAllocate();
+        DMA_DAC_4_TD[5] = CyDmaTdAllocate();
     }
     CyDmaTdSetConfiguration(DMA_DAC_4_TD[0], NSAMPLES_DAC, DMA_DAC_4_TD[1], CY_DMA_TD_INC_SRC_ADR);
     CyDmaTdSetConfiguration(DMA_DAC_4_TD[1], NSAMPLES_DAC, DMA_DAC_4_TD[2], CY_DMA_TD_INC_SRC_ADR);
-    CyDmaTdSetConfiguration(DMA_DAC_4_TD[2], NSAMPLES_DAC, CY_DMA_DISABLE_TD, DMA_DAC_4__TD_TERMOUT_EN | CY_DMA_TD_INC_SRC_ADR);
-    CyDmaTdSetAddress(DMA_DAC_4_TD[0], LO16((uint32)FLASH_CH4), LO16((uint32)IDAC8_4_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_4_TD[1], LO16((uint32)FLASH_CH4 + NSAMPLES_DAC), LO16((uint32)IDAC8_4_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_4_TD[2], LO16((uint32)FLASH_CH4 + 2*NSAMPLES_DAC), LO16((uint32)IDAC8_4_Data_PTR));
+    CyDmaTdSetConfiguration(DMA_DAC_4_TD[2], NSAMPLES_DAC, DMA_DAC_4_TD[3], CY_DMA_TD_INC_SRC_ADR);
+    CyDmaTdSetConfiguration(DMA_DAC_4_TD[3], NSAMPLES_DAC, DMA_DAC_4_TD[4], CY_DMA_TD_INC_SRC_ADR);
+    CyDmaTdSetConfiguration(DMA_DAC_4_TD[4], NSAMPLES_DAC, DMA_DAC_4_TD[5], CY_DMA_TD_INC_SRC_ADR);
+    CyDmaTdSetConfiguration(DMA_DAC_4_TD[5], NSAMPLES_DAC, CY_DMA_DISABLE_TD, DMA_DAC_4__TD_TERMOUT_EN | CY_DMA_TD_INC_SRC_ADR);
+    CyDmaTdSetAddress(DMA_DAC_4_TD[0], LO16((uint32)FLASH_CH4 + 0* NSAMPLES_DAC), LO16((uint32)IDAC8_4_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_4_TD[1], LO16((uint32)FLASH_CH4 + 1* NSAMPLES_DAC), LO16((uint32)IDAC8_4_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_4_TD[2], LO16((uint32)FLASH_CH4 + 2* NSAMPLES_DAC), LO16((uint32)IDAC8_4_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_4_TD[3], LO16((uint32)FLASH_CH4 + 3* NSAMPLES_DAC), LO16((uint32)IDAC8_4_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_4_TD[4], LO16((uint32)FLASH_CH4 + 4* NSAMPLES_DAC), LO16((uint32)IDAC8_4_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_4_TD[5], LO16((uint32)FLASH_CH4 + 5* NSAMPLES_DAC), LO16((uint32)IDAC8_4_Data_PTR));
     CyDmaChSetInitialTd(DMA_DAC_4_Chan, DMA_DAC_4_TD[0]);
     CyDmaChEnable(DMA_DAC_4_Chan, 1);
 }
