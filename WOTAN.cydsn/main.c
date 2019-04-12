@@ -24,13 +24,20 @@
 /* TODO
 generate sequence UART
 */
-// This version does not need an external crystal by default
+
+// Using the internal oscillator "IMO":
+//
+// to run without external crystal: go to  "Design Wide Resources(WOTAN.cydwr)" in Workspace Explorer (left)
+//              goto the tab "WOTAN.cydwr" -> go to "clocks" (tabs on the bottom) -> click anywhere inside 
+//              the yellow spread sheet -> change the roll-down menue in "PLL" (box in the middle)
+//              to "IMO(24 MHz)" -> recompile and program (CTRL + F5)
+
 #include "project.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 
-char  version[3] = "1.4";
+char  version[3] = "1.4"; 
 
 
 #define  TRUE               1
