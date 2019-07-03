@@ -53,7 +53,7 @@
 
 """ --- Required parameters ---- """ 
 # A) check device manager to see at which port number the board enumerates
-serialPort = '\\\\.\\COM8' # USBFS 8; UART 22 
+serialPort = '\\\\.\\COM20' # open_wotan:22, USBFS 8; UART 22 
 
 # B) baudrate
 baudrate = 1382400#921600
@@ -62,11 +62,11 @@ baudrate = 1382400#921600
 #channel = b'2'  # show output of DAC 2
 #channel = b'3'  # show output of DAC 3
 #channel = b'4'  # show output of DAC 4
-channel = b'2'  # show signal voltage between GPIO P0.6 (-) and GPIO P0.7 (+)
+channel = b'1'  # show signal voltage between GPIO P0.6 (-) and GPIO P0.7 (+)
 """ ----------------------------- """
 
 
-
+""" ======================================================================= """
 
 import serial
 import time
@@ -107,7 +107,9 @@ p_dac_range = b'l' # setting DAC output voltage range: 'l' for 0...1V ([l]ow; 'h
 try: # open and interact with serial port 
     ser = serial.Serial( serialPort, baudrate, timeout=time_out)
     # run MPI sequence on psoc
-    ser.write( b'5' )
+    ser.write( b'h' ) # set range: 'l' = low, 'h' = high
+    time.sleep(0.001)
+    ser.write( channel )
     time.sleep(0.001)
     ser.write( p_trig_dir )
     time.sleep(0.001)
@@ -156,18 +158,18 @@ if len(adc_data_bin) == numOfSamples*bytesPerSample: # check if run was successf
     plt.show()  
     
     
-    #  save data as ascii table
+    '''  save data as ascii table '''
     # write data in file with continuous numbering
-    cnt = 0
-    data_file_name = nameDataFiles + '_' + str(cnt) + '.txt'
-    while os.path.isfile( data_file_name ): #prevents overriding files
-        cnt += 1
-        data_file_name = nameDataFiles + '_' + str(cnt) + '.txt'
-    with open( data_file_name , 'w') as f:
-        for dat in adc_data_corr:
-            f.write("%s\n" % int(dat))
-        print( 'Data written to: ' + data_file_name +
-              '  (' + str(len(adc_data_int16)) + ' samples)')
+#    cnt = 0
+#    data_file_name = nameDataFiles + '_' + str(cnt) + '.txt'
+#    while os.path.isfile( data_file_name ): #prevents overriding files
+#        cnt += 1
+#        data_file_name = nameDataFiles + '_' + str(cnt) + '.txt'
+#    with open( data_file_name , 'w') as f:
+#        for dat in adc_data_corr:
+#            f.write("%s\n" % int(dat))
+#        print( 'Data written to: ' + data_file_name +
+#              '  (' + str(len(adc_data_int16)) + ' samples)')
         
 else:
     print("\n\n\nPSoC doesn't seem ready. Please try again. " +\

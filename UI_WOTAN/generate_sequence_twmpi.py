@@ -32,7 +32,7 @@
 
 """ --- Required parameters ---- """ 
 # A) check device manager to see at which port number the board enumerates
-serialPort = '\\\\.\\COM8' 
+serialPort = '\\\\.\\COM20' #open: 22 
 
 # B) baudrate
 baudrate = 1382400
@@ -68,7 +68,7 @@ nsamples_total = nsamples_ramp_up + nsamples_sequence + nsamples_ramp_down  # to
 max_value = 255     
 values = np.zeros((num_channels, nsamples_total),  dtype=np.uint8) # 2D array storing the sequence
 
-dac_sampling_rate = 250e3
+dac_sampling_rate = 500e3
 frequency_scale = 1/dac_sampling_rate
 
 # package settings
@@ -79,9 +79,9 @@ len_data = 32
 
 
 """ generate sequence """
-f = frequency_scale*np.asarray([11690,11690,1110,2220])                    # frequency in Hz
+f = frequency_scale*np.asarray([100.0/3.0,50000,48500,48000])                    # frequency in Hz
 f_mod = frequency_scale*np.asarray([0.0,0,0,0])                      # modulated frequency in Hz
-phi = np.asarray([0,90,0,0])                                         # phase in degree
+phi = np.asarray([180,90,0,0])                                         # phase in degree
 phi_mod = np.asarray([90,90,90,90])                                  # modulated phase in degree
 amp_start = np.asarray([0.47 * max_value, 0.10 * max_value, 0.47 * max_value, 0.47 * max_value])    # amplitude at the beginning of the main sequence 
 amp_end = np.asarray([0.47 * max_value, 0.47 * max_value, 0.47 * max_value, 0.47 * max_value])      # amplitude at the end of the main sequence
