@@ -531,7 +531,14 @@
     </Group>
   </Group>
   <Data key="DataVersionKey" value="2" />
-  <Group key="DMA" />
+  <Group key="DMA">
+    <Data key="0cd2612c-ddd2-449f-a3f4-938428027916" value="1" />
+    <Data key="4f28aa11-9e3a-4c4d-aaf2-ac0fdc842946" value="2" />
+    <Data key="13a159fd-bce3-4b5d-8d78-bd2f46136faf" value="2" />
+    <Data key="7325911c-51a8-48c7-983a-61b3feddd68e" value="2" />
+    <Data key="ba25e0fb-c984-4e52-925d-58ae777238b6" value="1" />
+    <Data key="e43af7a6-f8c8-435e-b673-a4355d0d3077" value="2" />
+  </Group>
   <Group key="DWRInstGuidMapping">
     <Group key="Clock">
       <Data key="5fd770f4-4524-4afc-a6a8-45d48684189d" value="clkADC" />
@@ -566,7 +573,8 @@
       <Data key="fca999f3-bffe-4dcc-9a8d-ff0e2c85cd10" value="isr_DAC_2" />
     </Group>
     <Group key="Pin">
-      <Data key="2d6a24c0-53d2-4451-883b-442b6f29573d" value="triggerIn" />
+      <Data key="2d6a24c0-53d2-4451-883b-442b6f29573d" value="triggerInOut" />
+      <Data key="5e73b163-270a-43f6-868a-e1b289eb8f6a" value="GNDA" />
       <Data key="6db41b00-0a99-483c-acd5-579a5b4af83c" value="Pin_2" />
       <Data key="8cc0935d-da2f-4299-9a4e-079ee7c257cb" value="Sig_inP" />
       <Data key="8d318d8b-cf7b-4b6b-b02c-ab1c5c49d0ba" value="SW" />
@@ -3721,6 +3729,11 @@
     <Group key="2d6a24c0-53d2-4451-883b-442b6f29573d">
       <Group key="0">
         <Data key="Port Format" value="3,0" />
+      </Group>
+    </Group>
+    <Group key="5e73b163-270a-43f6-868a-e1b289eb8f6a">
+      <Group key="0">
+        <Data key="Port Format" value="2,4" />
       </Group>
     </Group>
     <Group key="8cc0935d-da2f-4299-9a4e-079ee7c257cb">

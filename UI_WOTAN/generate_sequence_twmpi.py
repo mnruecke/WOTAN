@@ -79,11 +79,11 @@ len_data = 32
 
 
 """ generate sequence """
-f = frequency_scale*np.asarray([100.0/3.0,50000,48500,48000])                    # frequency in Hz
-f_mod = frequency_scale*np.asarray([0.0,0,0,0])                      # modulated frequency in Hz
-phi = np.asarray([180,90,0,0])                                         # phase in degree
+f = frequency_scale*np.asarray([100.0/3.0,48800,48800,49800])                    # frequency in Hz
+f_mod = frequency_scale*np.asarray([0.0,1000,0,0])                      # modulated frequency in Hz
+phi = np.asarray([90,90,0,90])                                         # phase in degree
 phi_mod = np.asarray([90,90,90,90])                                  # modulated phase in degree
-amp_start = np.asarray([0.47 * max_value, 0.10 * max_value, 0.47 * max_value, 0.47 * max_value])    # amplitude at the beginning of the main sequence 
+amp_start = np.asarray([0.47 * max_value, 0.47 * max_value, 0.47 * max_value, 0.47 * max_value])    # amplitude at the beginning of the main sequence 
 amp_end = np.asarray([0.47 * max_value, 0.47 * max_value, 0.47 * max_value, 0.47 * max_value])      # amplitude at the end of the main sequence
 off = np.asarray([0.5 * max_value, 0.5 * max_value, 0.5 * max_value, 0.5 * max_value])
 

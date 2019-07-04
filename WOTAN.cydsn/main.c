@@ -730,20 +730,20 @@ void run_sequence(void)
 
 void set_dac_range_1V(void) 
 {
-    IDAC8_1_SetRange( IDAC8_1_RANGE_1V );
-    IDAC8_2_SetRange( IDAC8_1_RANGE_1V );
-    IDAC8_3_SetRange( IDAC8_1_RANGE_1V );
-    IDAC8_4_SetRange( IDAC8_1_RANGE_1V );  
+//    IDAC8_1_SetRange( IDAC8_1_RANGE_1V );
+//    IDAC8_2_SetRange( IDAC8_1_RANGE_1V );
+//    IDAC8_3_SetRange( IDAC8_1_RANGE_1V );
+//    IDAC8_4_SetRange( IDAC8_1_RANGE_1V );  
     //UART_1_PutStringConst("1V DAC range");
     //UART_1_PutCRLF(1);
 }
 
 void set_dac_range_4V(void)
 {
-    IDAC8_1_SetRange( IDAC8_1_RANGE_4V );
-    IDAC8_2_SetRange( IDAC8_1_RANGE_4V );
-    IDAC8_3_SetRange( IDAC8_1_RANGE_4V );
-    IDAC8_4_SetRange( IDAC8_1_RANGE_4V );    
+//    IDAC8_1_SetRange( IDAC8_1_RANGE_4V );
+//    IDAC8_2_SetRange( IDAC8_1_RANGE_4V );
+//    IDAC8_3_SetRange( IDAC8_1_RANGE_4V );
+//    IDAC8_4_SetRange( IDAC8_1_RANGE_4V );    
     //UART_1_PutStringConst("4V DAC range");
     //UART_1_PutCRLF(1);
 }
