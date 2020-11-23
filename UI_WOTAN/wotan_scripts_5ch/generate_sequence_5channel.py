@@ -97,7 +97,7 @@ len_data = 32
 # Main frequencies (Hz)
 f = frequency_scale*np.asarray([1000,1000,1000,1000,15000])
 # Modulation frequencies (Hz)                    
-f_mod = frequency_scale*np.asarray([50,50,50,50,0])                      
+f_mod = frequency_scale*np.asarray([150,150,150,150,0])                      
 # Start phase for main frequencies (degree)
 phi = np.asarray([0+180, 90+180, 180, 270,0]) 
 # Start phase for modulation frequencies (degree)

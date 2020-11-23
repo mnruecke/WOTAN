@@ -422,7 +422,7 @@ void usbfs_interface(void)
                     
                     // write wave into flash memory:
                     wave_segment_ptr    = ((char *) signal_adc_1) + size_of_segment * package_number;
-                    strcpy(  wave_segment_ptr, (char *) &buffer[size_of_header] );                  
+                    memcpy(  wave_segment_ptr, (char *) &buffer[size_of_header], size_of_segment );                  
                     if( package_number == (number_of_packages-1) )
                     {
                         FLASH_Write( (uint8*)signal_adc_1, FLASH_STORAGE[channel_number], number_of_samples);
@@ -549,7 +549,7 @@ void uart_interface(void)
                 
                 // write wave into flash memory:
                 wave_segment_ptr    = ((char *) signal_adc_1) + size_of_segment * package_number;
-                strcpy(  wave_segment_ptr, (char *) &puttyIn[size_of_header] );
+                memcpy(  wave_segment_ptr, (char *) &puttyIn[size_of_header], size_of_segment );
                 if( package_number == (number_of_packages-1) )
                 {
                     FLASH_Write( (uint8*)signal_adc_1, FLASH_STORAGE[channel_number], number_of_samples);

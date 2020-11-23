@@ -119,7 +119,7 @@ try: # open and interact with serial port
     
    
     
-    ser.write( b'5' )
+    ser.write( b'4' )
     time.sleep(0.001)
     ser.write( p_trig_dir )
     time.sleep(0.001)
