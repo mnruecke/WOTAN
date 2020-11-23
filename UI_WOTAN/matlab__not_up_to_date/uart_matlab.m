@@ -36,13 +36,13 @@
 % ========================================
 
 % main settings
-com_port  = 'COM10'; % check device manager to see which com-port the programmer enumerates
+com_port  = 'COM12'; % check device manager to see which com-port the programmer enumerates
 baud_rate = 115200;
 time_out  = 10;
 
 adcBufByteSize = 60000; % 
 
-adc_channel = '5'; % default: '5' (signal input between GPIO 0.6 and 0.7); '1...4': for checking output on DAC1 ... DAC4
+adc_channel = '4'; % default: '5' (signal input between GPIO 0.6 and 0.7); '1...4': for checking output on DAC1 ... DAC4
 
 file_name = '3D_mpi_data_'; % results are saved as ascii table 
 % // main settings

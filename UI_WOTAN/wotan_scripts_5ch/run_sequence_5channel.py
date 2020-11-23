@@ -56,11 +56,12 @@
 #serialPort = '\\\\.\\COM22' # USBFS 8; UART 22 
 # usbfs - lenovo thinkpad, Module M:
 #serialPort = '\\\\.\\COM17' 
-serialPort = '\\\\.\\COM15'
+#serialPort = '\\\\.\\COM15'
 # usbfs - lenovo thinkpad, Module J:
 #serialPort = '\\\\.\\COM19' 
 # usbfs - lifebook, Module J:
 #serialPort = '\\\\.\\COM11' 
+serialPort = '\\\\.\\COM12' 
 
 # B) baudrate
 baudrate = 1382400#921600
@@ -99,7 +100,7 @@ timePerSample  = 0.0005 # sample time in ms
 sequDuration   = 15 # sequence duration in ms
 numOfSamples   = int(sequDuration/timePerSample)
 bufInputSize   = numOfSamples * bytesPerSample
-adcVoltPerBit    = 0.0005 # scaling factor for ADC data
+adcVoltPerBit    = 4.80 / 4096 # scaling factor for ADC data: PSoC-VDD/ADC-res
 
 # list of commands defined in WOTAN
 p_run_sequ  = b'r' # starts the sequence
@@ -118,7 +119,7 @@ try: # open and interact with serial port
     
    
     
-    ser.write( b'2' )
+    ser.write( b'5' )
     time.sleep(0.001)
     ser.write( p_trig_dir )
     time.sleep(0.001)

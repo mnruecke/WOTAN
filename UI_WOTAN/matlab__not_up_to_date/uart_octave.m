@@ -38,7 +38,7 @@
 % 0) main settings:
 
 % 0.1) serial interface: (requires the instrument-control package)
-com_port = "\\\\.\\COM21"; % windows: "\\\\.\\COM<port_num>" - linux: "/dev/ttyACM<port_num>"
+com_port = "\\\\.\\COM12"; % windows: "\\\\.\\COM<port_num>" - linux: "/dev/ttyACM<port_num>"
 baudrate = 115200; 
 timeout  = 1; 
 % note: script works fine under linux but the USB-to-UART on the onboard programmer
@@ -47,11 +47,11 @@ timeout  = 1;
 % GPIO 12.6 (Rx) and GPIO 12.7 (Tx).  
 
 % 0.2) If data is to be saved (ascii table): choose name of data files
-save_data = true; 
+save_data = false; 
 data_file_name = "3D_mpi_signal"; % (resulting file format: <data_file_name>_<num>.txt)
 
 % 0.3) select channel to record
-chan = '5'; % '5' for recording the signal between GPIO 0.6 and 0.7 (default)
+chan = '3'; % '5' for recording the signal between GPIO 0.6 and 0.7 (default)
             % '1','2','3','4' for monitoring output of DAC 1..4 (GPIO 2.0,2.3,2.5,2.7)
 
 % 0.4) acquire serial port

@@ -35,13 +35,14 @@
 #serialPort = '\\\\.\\COM8' 
 # usbfs - lenovo thinkpad, Module M:
 #serialPort = '\\\\.\\COM17' 
-serialPort = '\\\\.\\COM15'
+#serialPort = '\\\\.\\COM15'
 # usbfs - lenovo thinkpad, Module J:
 #serialPort = '\\\\.\\COM19' 
 # Port for BLE HC-05 ("next") - lenovo thinkpad: 
 #serialPort = '\\\\.\\COM10' 
 # usbfs - lifebook, Module J:
 #serialPort = '\\\\.\\COM11' 
+serialPort = '\\\\.\\COM12' 
 
 # B) baudrate
 baudrate = 1382400
