@@ -84,6 +84,9 @@ char  version[3] = "1.6";
 // 14) (uart only) run sequence and swithes to the next channel (just running, no output)
 #define KEY_RUN_AND_NEXT     'a'
 
+// 15) new: Shift waveforms in multiples of sampling time (usage: 'O<channel-pair><8bit-offset>')
+#define KEY_SHIFT_WAVEFORMS  'O'
+
 
 /* end command set */
 
@@ -105,6 +108,9 @@ char  version[3] = "1.6";
 #define  FLASH_CH4          (const uint8 *)     0x30000 
 
 const uint8 * FLASH_STORAGE[4] = {FLASH_CH1, FLASH_CH2, FLASH_CH3, FLASH_CH4};
+uint32 flash_offset_ch1a_ch1b = 0; //Shift wave form in multiples of sampling steps (for CH1a and CH1b)
+uint32 flash_offset_ch2_ch3 = 0; //Shift wave form in multiples of sampling steps (for CH2 and CH3)
+
 
 #define  CLOCK_SHIFT_CH1     0b1100   
 #define  CLOCK_SHIFT_CH2     0b0011   
@@ -120,7 +126,9 @@ const uint8 * FLASH_STORAGE[4] = {FLASH_CH1, FLASH_CH2, FLASH_CH3, FLASH_CH4};
 #define CH2             2
 #define CH3             3
 #define CH4             4
-#define MAX_VALUE       180 // 180 => CH1, CH2: 1.82 V-pp; CH3, Ch4: 1.78 V-pp
+#define MAX_VALUE       254 
+#define IDLE_VALUE_CH1a_CH1b        140
+#define IDLE_VALUE_CH2_CH3_CH4      MAX_VALUE/2
 
 
 
@@ -304,18 +312,40 @@ void init_components(void){
         ShiftReg_1_WriteRegValue(CLOCK_SHIFT_CH1); // Shift Register are for avoiding simultaneous DMA requests
         ShiftReg_1_Start();
     IDAC8_2_Start();
-        IDAC8_1_SetValue(MAX_VALUE/2);
+        IDAC8_2_SetValue(MAX_VALUE/2);
         ShiftReg_2_WriteRegValue(CLOCK_SHIFT_CH2);
         ShiftReg_2_Start();
     IDAC8_3_Start();
-        IDAC8_1_SetValue(MAX_VALUE/2);
+        IDAC8_3_SetValue(MAX_VALUE/2);
         ShiftReg_3_WriteRegValue(CLOCK_SHIFT_CH3);
         ShiftReg_3_Start();
     IDAC8_4_Start();
-        IDAC8_1_SetValue(MAX_VALUE/2);
+        IDAC8_4_SetValue(MAX_VALUE/2);
         ShiftReg_4_WriteRegValue(CLOCK_SHIFT_CH4);
         ShiftReg_4_Start();
    
+    //Waveforms in flash need to be extendet with dac idle values
+    // for 256 additional steps to allow wave shifting of up to 256 steps 
+    // (regarding command KEY_SHIFT_WAVEFORMS)
+    uint8 dac_default[256];
+    uint8 dac_default_ch1a_ch1b[256];
+    if( *(FLASH_CH2+(3*NSAMPLES_DAC-1)) != IDLE_VALUE_CH2_CH3_CH4 )
+    {// -> write to flash only once after programming
+        LED_Write(1u);
+        
+        for(int i=0;i<256;i++){
+            dac_default[i]           = IDLE_VALUE_CH2_CH3_CH4;
+            dac_default_ch1a_ch1b[i] = IDLE_VALUE_CH1a_CH1b;
+        }
+        FLASH_Write( dac_default_ch1a_ch1b, FLASH_CH1+(3*NSAMPLES_DAC-1), 256);    
+        FLASH_Write( dac_default, FLASH_CH2+(3*NSAMPLES_DAC-1), 256);    
+        FLASH_Write( dac_default, FLASH_CH3+(3*NSAMPLES_DAC-1), 256);    
+        FLASH_Write( dac_default, FLASH_CH4+(3*NSAMPLES_DAC-1), 256); 
+        
+        CyDelay(10);
+        LED_Write(0u);
+    }//END if( *(FLASH_CH2+(3*NSAMPLES_DAC-1)) != IDLE_VALUE_CH2_CH3_CH4 )
+    
 
     // Receive channel
     ADC_SAR_1_Start();
@@ -464,6 +494,19 @@ void usbfs_interface(void)
                     USBUART_PutData( (uint8 *)pseudoid , strlength);
                     
                 }
+                
+                // 11a) Shift Sampling patterns in multiples of sampling time
+                if( buffer[0] == KEY_SHIFT_WAVEFORMS ){
+                    if( buffer[1] == '1' ){// Shift channel pair [1] (CH1a/CH1b)
+                        flash_offset_ch1a_ch1b = buffer[2];
+                    }else if( buffer[1] == '2' ){// Shift channel pair [2] (CH2/CH3)
+                        flash_offset_ch2_ch3 = buffer[2];
+                    }else if( buffer[1] == 'B' ){// Shift [B]oth channel pairs
+                        flash_offset_ch1a_ch1b  = buffer[2];
+                        flash_offset_ch2_ch3    = buffer[2];
+                    }
+                }//END if( buffer[0] == KEY_SHIFT_WAVEFORMS )
+                
                 
                 // 11) Get the binary data from the two uint16 ADC buffers
                 if ( buffer[0] == KEY_SEND_BYTE_DAT )
@@ -806,9 +849,9 @@ void dma_dac_1_init(void)
     CyDmaTdSetConfiguration(DMA_DAC_1_TD[0], NSAMPLES_DAC, DMA_DAC_1_TD[1], CY_DMA_TD_INC_SRC_ADR);
     CyDmaTdSetConfiguration(DMA_DAC_1_TD[1], NSAMPLES_DAC, DMA_DAC_1_TD[2], CY_DMA_TD_INC_SRC_ADR);
     CyDmaTdSetConfiguration(DMA_DAC_1_TD[2], NSAMPLES_DAC, CY_DMA_DISABLE_TD, DMA_DAC_1__TD_TERMOUT_EN | CY_DMA_TD_INC_SRC_ADR);
-    CyDmaTdSetAddress(DMA_DAC_1_TD[0], LO16((uint32)FLASH_CH1), LO16((uint32)IDAC8_1_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_1_TD[1], LO16((uint32)FLASH_CH1 + NSAMPLES_DAC), LO16((uint32)IDAC8_1_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_1_TD[2], LO16((uint32)FLASH_CH1 + 2*NSAMPLES_DAC), LO16((uint32)IDAC8_1_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_1_TD[0], LO16((uint32)(FLASH_CH1+flash_offset_ch1a_ch1b)), LO16((uint32)IDAC8_1_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_1_TD[1], LO16((uint32)(FLASH_CH1+flash_offset_ch1a_ch1b) + NSAMPLES_DAC), LO16((uint32)IDAC8_1_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_1_TD[2], LO16((uint32)(FLASH_CH1+flash_offset_ch1a_ch1b) + 2*NSAMPLES_DAC), LO16((uint32)IDAC8_1_Data_PTR));
     CyDmaChSetInitialTd(DMA_DAC_1_Chan, DMA_DAC_1_TD[0]);
     CyDmaChEnable(DMA_DAC_1_Chan, 1);
 }
@@ -827,9 +870,9 @@ void dma_dac_2_init(void)
     CyDmaTdSetConfiguration(DMA_DAC_2_TD[0], NSAMPLES_DAC, DMA_DAC_2_TD[1], CY_DMA_TD_INC_SRC_ADR);
     CyDmaTdSetConfiguration(DMA_DAC_2_TD[1], NSAMPLES_DAC, DMA_DAC_2_TD[2], CY_DMA_TD_INC_SRC_ADR);
     CyDmaTdSetConfiguration(DMA_DAC_2_TD[2], NSAMPLES_DAC, CY_DMA_DISABLE_TD, DMA_DAC_2__TD_TERMOUT_EN | CY_DMA_TD_INC_SRC_ADR);
-    CyDmaTdSetAddress(DMA_DAC_2_TD[0], LO16((uint32)FLASH_CH2), LO16((uint32)IDAC8_2_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_2_TD[1], LO16((uint32)FLASH_CH2 + NSAMPLES_DAC), LO16((uint32)IDAC8_2_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_2_TD[2], LO16((uint32)FLASH_CH2 + 2*NSAMPLES_DAC), LO16((uint32)IDAC8_2_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_2_TD[0], LO16((uint32)(FLASH_CH2+flash_offset_ch2_ch3)), LO16((uint32)IDAC8_2_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_2_TD[1], LO16((uint32)(FLASH_CH2+flash_offset_ch2_ch3) + NSAMPLES_DAC), LO16((uint32)IDAC8_2_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_2_TD[2], LO16((uint32)(FLASH_CH2+flash_offset_ch2_ch3) + 2*NSAMPLES_DAC), LO16((uint32)IDAC8_2_Data_PTR));
     CyDmaChSetInitialTd(DMA_DAC_2_Chan, DMA_DAC_2_TD[0]);
     CyDmaChEnable(DMA_DAC_2_Chan, 1);
 }
@@ -848,9 +891,9 @@ void dma_dac_3_init(void)
     CyDmaTdSetConfiguration(DMA_DAC_3_TD[0], NSAMPLES_DAC, DMA_DAC_3_TD[1], CY_DMA_TD_INC_SRC_ADR);
     CyDmaTdSetConfiguration(DMA_DAC_3_TD[1], NSAMPLES_DAC, DMA_DAC_3_TD[2], CY_DMA_TD_INC_SRC_ADR);
     CyDmaTdSetConfiguration(DMA_DAC_3_TD[2], NSAMPLES_DAC, CY_DMA_DISABLE_TD, DMA_DAC_3__TD_TERMOUT_EN | CY_DMA_TD_INC_SRC_ADR);
-    CyDmaTdSetAddress(DMA_DAC_3_TD[0], LO16((uint32)FLASH_CH3), LO16((uint32)IDAC8_3_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_3_TD[1], LO16((uint32)FLASH_CH3 + NSAMPLES_DAC), LO16((uint32)IDAC8_3_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_3_TD[2], LO16((uint32)FLASH_CH3 + 2*NSAMPLES_DAC), LO16((uint32)IDAC8_3_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_3_TD[0], LO16((uint32)(FLASH_CH3+flash_offset_ch2_ch3)), LO16((uint32)IDAC8_3_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_3_TD[1], LO16((uint32)(FLASH_CH3+flash_offset_ch2_ch3) + NSAMPLES_DAC), LO16((uint32)IDAC8_3_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_3_TD[2], LO16((uint32)(FLASH_CH3+flash_offset_ch2_ch3) + 2*NSAMPLES_DAC), LO16((uint32)IDAC8_3_Data_PTR));
     CyDmaChSetInitialTd(DMA_DAC_3_Chan, DMA_DAC_3_TD[0]);
     CyDmaChEnable(DMA_DAC_3_Chan, 1);
 }

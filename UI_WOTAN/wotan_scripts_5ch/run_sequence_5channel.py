@@ -117,9 +117,12 @@ try: # open and interact with serial port
     ser = serial.Serial( serialPort, baudrate, timeout=time_out)
     # run MPI sequence on psoc
     
-   
+    ##Shift waveforms
+    #ser.write( b'OB\x77' )
+    #time.sleep(0.01)  
+
     
-    ser.write( b'4' )
+    ser.write( b'1' )
     time.sleep(0.001)
     ser.write( p_trig_dir )
     time.sleep(0.001)

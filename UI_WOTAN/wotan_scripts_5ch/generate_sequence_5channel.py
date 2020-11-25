@@ -97,11 +97,11 @@ len_data = 32
 # Main frequencies (Hz)
 f = frequency_scale*np.asarray([1000,1000,1000,1000,15000])
 # Modulation frequencies (Hz)                    
-f_mod = frequency_scale*np.asarray([150,150,150,150,0])                      
+f_mod = frequency_scale*np.asarray([0,0,0,0,0])                      
 # Start phase for main frequencies (degree)
-phi = np.asarray([0+180, 90+180, 180, 270,0]) 
+phi = np.asarray([0+180, 0+180, 0, 0,0]) 
 # Start phase for modulation frequencies (degree)
-phi_mod = np.asarray([0,0,90,90,90])   
+phi_mod = np.asarray([90,90,90,90,90])   
 # Amplitudes at t=15 ms (start ramp goes from t=0...15 ms:
 amp_start = max_value * np.asarray([0.45, 0.45, 0.47, 0.47, 0.47])   
 # Amplitudes at t=30 ms 
