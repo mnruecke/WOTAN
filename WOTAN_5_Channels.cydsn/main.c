@@ -84,7 +84,7 @@ char  version[3] = "1.6";
 // 14) (uart only) run sequence and swithes to the next channel (just running, no output)
 #define KEY_RUN_AND_NEXT     'a'
 
-// 15) new: Shift waveforms in multiples of sampling time (usage: 'O<channel-pair><8bit-offset>')
+// 15) new: Shift waveforms in multiples of sampling time (usage: 'O<channel-pair><16bit-offset>')
 #define KEY_SHIFT_WAVEFORMS  'O'
 
 
@@ -308,41 +308,41 @@ void init_components(void){
     
     // Transmit channels 
     IDAC8_1_Start();
-        IDAC8_1_SetValue(MAX_VALUE/2); // Set dc value for avoiding base level fluctuations before first run (due to DC block capacitors)
+        IDAC8_1_SetValue(IDLE_VALUE_CH1a_CH1b); // Set dc value for avoiding base level fluctuations before first run (due to DC block capacitors)
         ShiftReg_1_WriteRegValue(CLOCK_SHIFT_CH1); // Shift Register are for avoiding simultaneous DMA requests
         ShiftReg_1_Start();
     IDAC8_2_Start();
-        IDAC8_2_SetValue(MAX_VALUE/2);
+        IDAC8_2_SetValue(IDLE_VALUE_CH2_CH3_CH4);
         ShiftReg_2_WriteRegValue(CLOCK_SHIFT_CH2);
         ShiftReg_2_Start();
     IDAC8_3_Start();
-        IDAC8_3_SetValue(MAX_VALUE/2);
+        IDAC8_3_SetValue(IDLE_VALUE_CH2_CH3_CH4);
         ShiftReg_3_WriteRegValue(CLOCK_SHIFT_CH3);
         ShiftReg_3_Start();
     IDAC8_4_Start();
-        IDAC8_4_SetValue(MAX_VALUE/2);
+        IDAC8_4_SetValue(IDLE_VALUE_CH2_CH3_CH4);
         ShiftReg_4_WriteRegValue(CLOCK_SHIFT_CH4);
         ShiftReg_4_Start();
    
     //Waveforms in flash need to be extendet with dac idle values
     // for 256 additional steps to allow wave shifting of up to 256 steps 
     // (regarding command KEY_SHIFT_WAVEFORMS)
-    uint8 dac_default[256];
-    uint8 dac_default_ch1a_ch1b[256];
-    if( *(FLASH_CH2+(3*NSAMPLES_DAC-1)) != IDLE_VALUE_CH2_CH3_CH4 )
+    uint8 dac_default[NSAMPLES_ADC];
+    uint8 dac_default_ch1a_ch1b[NSAMPLES_ADC];
+    if( *(FLASH_CH2+(NSAMPLES_ADC-1)) != IDLE_VALUE_CH2_CH3_CH4 )
     {// -> write to flash only once after programming
         LED_Write(1u);
         
-        for(int i=0;i<256;i++){
+        for(int i=0;i<(NSAMPLES_ADC/2);i++){
             dac_default[i]           = IDLE_VALUE_CH2_CH3_CH4;
             dac_default_ch1a_ch1b[i] = IDLE_VALUE_CH1a_CH1b;
         }
-        FLASH_Write( dac_default_ch1a_ch1b, FLASH_CH1+(3*NSAMPLES_DAC-1), 256);    
-        FLASH_Write( dac_default, FLASH_CH2+(3*NSAMPLES_DAC-1), 256);    
-        FLASH_Write( dac_default, FLASH_CH3+(3*NSAMPLES_DAC-1), 256);    
-        FLASH_Write( dac_default, FLASH_CH4+(3*NSAMPLES_DAC-1), 256); 
+        FLASH_Write( dac_default_ch1a_ch1b, FLASH_CH1+(NSAMPLES_ADC/2), NSAMPLES_ADC);    
+        FLASH_Write( dac_default, FLASH_CH2+(NSAMPLES_ADC/2), NSAMPLES_ADC);    
+        FLASH_Write( dac_default, FLASH_CH3+(NSAMPLES_ADC/2), NSAMPLES_ADC);    
+        //FLASH_Write( dac_default, FLASH_CH4+(NSAMPLES_ADC/2), NSAMPLES_ADC); 
         
-        CyDelay(10);
+        //CyDelay(10);
         LED_Write(0u);
     }//END if( *(FLASH_CH2+(3*NSAMPLES_DAC-1)) != IDLE_VALUE_CH2_CH3_CH4 )
     
@@ -455,7 +455,7 @@ void usbfs_interface(void)
                     memcpy(  wave_segment_ptr, (char *) &buffer[size_of_header], size_of_segment );                  
                     if( package_number == (number_of_packages-1) )
                     {
-                        FLASH_Write( (uint8*)signal_adc_1, FLASH_STORAGE[channel_number], number_of_samples);
+                        FLASH_Write( (uint8*)signal_adc_1, FLASH_STORAGE[channel_number], number_of_samples-20);
                     }
                 }
                 // 7) Use gpio P3[0] as trigger output
@@ -495,15 +495,15 @@ void usbfs_interface(void)
                     
                 }
                 
-                // 11a) Shift Sampling patterns in multiples of sampling time
+                // 11a) Shift waveforms in multiples of sampling time
                 if( buffer[0] == KEY_SHIFT_WAVEFORMS ){
                     if( buffer[1] == '1' ){// Shift channel pair [1] (CH1a/CH1b)
-                        flash_offset_ch1a_ch1b = buffer[2];
+                        flash_offset_ch1a_ch1b = (buffer[2]<<8)+buffer[3];
                     }else if( buffer[1] == '2' ){// Shift channel pair [2] (CH2/CH3)
-                        flash_offset_ch2_ch3 = buffer[2];
+                        flash_offset_ch2_ch3 = (buffer[2]<<8)+buffer[3];
                     }else if( buffer[1] == 'B' ){// Shift [B]oth channel pairs
-                        flash_offset_ch1a_ch1b  = buffer[2];
-                        flash_offset_ch2_ch3    = buffer[2];
+                        flash_offset_ch1a_ch1b  = (buffer[2]<<8)+buffer[3];
+                        flash_offset_ch2_ch3    = (buffer[2]<<8)+buffer[3];
                     }
                 }//END if( buffer[0] == KEY_SHIFT_WAVEFORMS )
                 
