@@ -4,7 +4,7 @@
  *
  * Martin.Rueckert@physik.uni-wuerzburg.de
  *
- * Copyright (C) 2017-2021 University of Wuerzburg, Experimental Physics 5, Biophysics
+ * Copyright (C) 2017 University of Wuerzburg, Experimental Physics 5, Biophysics
  * https://www.physik.uni-wuerzburg.de/ep5/magnetic-particle-imaging/
  *
  * WOTAN is free software: you can redistribute it and/or modify
@@ -32,14 +32,13 @@ generate sequence UART
 //              the yellow spread sheet -> change the roll-down menue in "PLL" (box in the middle)
 //              to "IMO(24 MHz)" -> recompile and program (CTRL + F5)
 
-#include "project.h"// automatically generated header file
+#include "project.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 
-char  version[3] = "1.7";  
-// Version 1.7: split CH1 and CH2 into CH1a/CH1b and CH2a/CH2b
-// by halfing the sampling rate
+char  version[3] = "1.4"; 
+
 
 #define  TRUE               1
 #define  FALSE              0
@@ -52,12 +51,11 @@ char  version[3] = "1.7";
 
 /* command set */
 // 1) select channel
-#define  KEY_SIG_1           '1'
-#define  KEY_SIG_2           '2'
-#define  KEY_SIG_3           '3'
-#define  KEY_SIG_4           '4'
-#define  KEY_SIG_5           '5'
-#define  KEY_SIG_IN          '6'
+#define  KEY_DAC1            '1'
+#define  KEY_DAC2            '2'
+#define  KEY_DAC3            '3'
+#define  KEY_DAC4            '4'
+#define  KEY_SIG_IN          '5'
 // 2) run sequence
 #define  KEY_RUN             'r'
 // 3) reset firmware
@@ -85,9 +83,6 @@ char  version[3] = "1.7";
 // 14) (uart only) run sequence and swithes to the next channel (just running, no output)
 #define KEY_RUN_AND_NEXT     'a'
 
-// 15) new: Shift waveforms in multiples of sampling time (usage: 'O<channel-pair><16bit-offset>')
-#define KEY_SHIFT_WAVEFORMS  'O'
-
 
 /* end command set */
 
@@ -103,34 +98,26 @@ char  version[3] = "1.7";
 #define  N_TDS_ADC          20
 #define  N_TDS_DAC          3               // TD1: on ramp, TD2: sequence (each with length NSAMPLES_DAC)
 
-
 #define  FLASH_CH1          (const uint8 *)     0x0A000  // Flash addresses for storing the DAC wave forms
 #define  FLASH_CH2          (const uint8 *)     0x10000
 #define  FLASH_CH3          (const uint8 *)     0x20000
 #define  FLASH_CH4          (const uint8 *)     0x30000 
-const uint8 * FLASH_STORAGE[4] = {FLASH_CH1, FLASH_CH2, FLASH_CH3, FLASH_CH4};
-uint32 flash_offset_ch1 = 0; //Shifts wave form of CHX n sampling steps
-uint32 flash_offset_ch2 = 0; 
-uint32 flash_offset_ch3 = 0; 
-uint32 flash_offset_ch4 = 0; 
 
+const uint8 * FLASH_STORAGE[4] = {FLASH_CH1, FLASH_CH2, FLASH_CH3, FLASH_CH4};
 
 #define  CLOCK_SHIFT_CH1     0b1100   
-// channel splitting (CH1 -> CH1a / CH1b)
-#define  CLOCK_SHIFT_CH1ab    0b01111000
-#define  CLOCK_SHIFT_CH2     0b0011
-// channel splitting (CH2 -> CH2a / CH2b)
-#define  CLOCK_SHIFT_CH2ab    0b10000111
-#define  CLOCK_SHIFT_CH3     0b0110   
+#define  CLOCK_SHIFT_CH2     0b0110   
+#define  CLOCK_SHIFT_CH3     0b0011   
 #define  CLOCK_SHIFT_CH4     0b1001   
 
-
 // Set all MPI waveform parameters
-#define MAX_VALUE       254 
-#define IDLE_VALUE_CH1  140
-#define IDLE_VALUE_CH2  140
-#define IDLE_VALUE_CH3  MAX_VALUE/2
-#define IDLE_VALUE_CH4  MAX_VALUE/2
+#define NUM_CHANNELS    4
+#define CH1             0
+#define CH2             1
+#define CH3             2
+#define CH4             3
+#define MAX_VALUE       180 // 180 => CH1, CH2: 1.82 V-pp; CH3, Ch4: 1.78 V-pp
+
 
 
 /* Defines for DMA_DAC_1 */
@@ -207,8 +194,8 @@ uint16  bytenumber = 0;
 int     rxBuf;
 int     rxBufBLE;
 uint8   run_count_DAC_1=0;
-uint8   ready_to_start_sequence = FALSE;
-
+uint8   nextRun = FALSE;
+uint  packages_received = 0;
 
 // USBUART (USBFS)
 #define USBUART_BUFFER_SIZE (64u)
@@ -216,18 +203,14 @@ uint8   ready_to_start_sequence = FALSE;
 #define USBFS_TX_SIZE   60
 uint16 count;
 uint8 buffer[USBFS_TX_SIZE];
-
+uint8 data_tx[4];
 
 // programm sequence
 const uint size_of_header  = 8;
 const uint size_of_segment = 32;
-uint packages_received = 0;
-
-
 // Two adc buffers 
 uint16 signal_adc_1[NSAMPLES_ADC]; 
 uint16 signal_adc_2[NSAMPLES_ADC];
-
 
 // function prototypes
 void init_components(void);
@@ -247,8 +230,6 @@ void set_dac_range_1V(void);
 void set_dac_range_4V(void);
 void trigger_out(void);
 void trigger_in(void);
-
-
 CY_ISR_PROTO( isr_triggerIn );
 CY_ISR_PROTO( isr_DAC_1_done );
 CY_ISR_PROTO( isr_DAC_2_done );
@@ -263,99 +244,66 @@ uint8 count_of_runs=0;
 uint8 isDAC1Busy = FALSE;
 
 
-int main(void){
+
+int main(void)
+{
     // Initialization routines
+    CyGlobalIntEnable;
     init_components();
-    
+//    if( *(FLASH_CH1 ) == 0 ) // Skip sequence generation if non-empty
+//        generate_sequence(); // (calculation takes ~5 seconds on PSoC)
     show_default_message();
     
     // Avoid errorness serial input due to initial switching noise:
     CyDelay(500);
     UART_1_ClearRxBuffer();
       
-    for(;;){
+    for(;;) 
+    {       
         // uart interface
-        uart_interface();  // for using BLE module HC-05 via UART interface
+        uart_interface();  // for using USBUART included on Programmer Kit
         
         // fast usbfs iterface
         usbfs_interface(); // for using fast USBUART routed to the onboard Micro-USB-B socket
         
-    }//endfor(;;)
+    }
 }/* END MAIN() ***********************************/
 
-
-
-void init_components(void){
-    CyGlobalIntEnable;    
-    
-    // Init code for splitting CH1 into CH1a and CH1b (halfing the sampling rate)
-    sample_CH1a_Start(); 
-    sample_CH1b_Start();
-    sample_CH2a_Start(); 
-    sample_CH2b_Start();
-    ClockShift_1ab_WriteRegValue(CLOCK_SHIFT_CH1ab);
-    ClockShift_1ab_Start();  
-    ClockShift_2ab_WriteRegValue(CLOCK_SHIFT_CH2ab);
-    ClockShift_2ab_Start(); 
-    
-    set_dac_range_4V();
-    
+void init_components(void)
+{
     // ADDA Clock
     pwmSAMPLING_Start();
     
     // Transmit channels 
     IDAC8_1_Start();
-        IDAC8_1_SetValue(IDLE_VALUE_CH1); // Set dc value for avoiding base level fluctuations before first run (due to DC block capacitors)
-        ClockShift_1_WriteRegValue(CLOCK_SHIFT_CH1); // Shift Register are for avoiding simultaneous DMA requests
-        ClockShift_1_Start();
+        IDAC8_1_SetValue(MAX_VALUE/2); // Set dc value for avoiding base level fluctuations before first run (due to DC block capacitors)
+        ShiftReg_1_WriteRegValue(CLOCK_SHIFT_CH1); // Shift Register are for avoiding simultaneous DMA requests
+        ShiftReg_1_Start();
     IDAC8_2_Start();
-        IDAC8_2_SetValue(IDLE_VALUE_CH2);
-        ClockShift_2_WriteRegValue(CLOCK_SHIFT_CH2);
-        ClockShift_2_Start();
+        IDAC8_1_SetValue(MAX_VALUE/2);
+        ShiftReg_2_WriteRegValue(CLOCK_SHIFT_CH2);
+        ShiftReg_2_Start();
     IDAC8_3_Start();
-        IDAC8_3_SetValue(IDLE_VALUE_CH3);
-        ClockShift_3_WriteRegValue(CLOCK_SHIFT_CH3);
-        ClockShift_3_Start();
+        IDAC8_1_SetValue(MAX_VALUE/2);
+        ShiftReg_3_WriteRegValue(CLOCK_SHIFT_CH3);
+        ShiftReg_3_Start();
     IDAC8_4_Start();
-        IDAC8_4_SetValue(IDLE_VALUE_CH4);
-        ClockShift_4_WriteRegValue(CLOCK_SHIFT_CH4);
-        ClockShift_4_Start();
-   
-    //Waveforms in flash need to be extendet with dac idle values
-    // for 256 additional steps to allow wave shifting of up to 256 steps 
-    // (regarding command KEY_SHIFT_WAVEFORMS)
-    uint8 dac_idle_ch1[NSAMPLES_ADC];
-    uint8 dac_idle_ch2[NSAMPLES_ADC];
-    uint8 dac_idle_ch3[NSAMPLES_ADC];
-    uint8 dac_idle_ch4[NSAMPLES_ADC];
-    if( *(FLASH_CH4+(NSAMPLES_ADC-1)) != IDLE_VALUE_CH4 )
-    {// -> write to flash only once after programming
-        LED_Write(1u);
-        
-        for(int i=0;i<(NSAMPLES_ADC/2);i++){
-            dac_idle_ch1[i] = IDLE_VALUE_CH1;
-            dac_idle_ch1[i] = IDLE_VALUE_CH2;
-            dac_idle_ch1[i] = IDLE_VALUE_CH3;
-            dac_idle_ch1[i] = IDLE_VALUE_CH4;
-        }//END for(int i=0;i<(NSAMPLES_ADC/2);i++) 
-        FLASH_Write( dac_idle_ch1, FLASH_CH1+(NSAMPLES_ADC/2), NSAMPLES_ADC);    
-        FLASH_Write( dac_idle_ch2, FLASH_CH2+(NSAMPLES_ADC/2), NSAMPLES_ADC);    
-        FLASH_Write( dac_idle_ch3, FLASH_CH3+(NSAMPLES_ADC/2), NSAMPLES_ADC);    
-        FLASH_Write( dac_idle_ch4, FLASH_CH4+(NSAMPLES_ADC/2), NSAMPLES_ADC); 
-        
-        //CyDelay(10);
-        LED_Write(0u);
-    }//END if( *(FLASH_CH2+(3*NSAMPLES_DAC-1)) != IDLE_VALUE_CH2_CH3_CH4 )
-    
+        IDAC8_1_SetValue(MAX_VALUE/2);
+        ShiftReg_4_WriteRegValue(CLOCK_SHIFT_CH4);
+        ShiftReg_4_Start();
 
     // Receive channel
     ADC_SAR_1_Start();
         ADC_SAR_1_IRQ_Disable();
     ADC_SAR_2_Start();
         ADC_SAR_2_IRQ_Disable();
+    Track_Hold_1_Start();
+    Track_Hold_2_Start();
+    
+    refOut_Start();
     sigBuf_Start();
     
-    // Sets the Trigger channel as input
+    // Sets the Trigger channel as ouput
     CompTrigger_Stop();
     enableTrigOut_Write( TRIGGER_OUT_TRUE );
     
@@ -418,18 +366,12 @@ void usbfs_interface(void)
                 }
                 
                 /* Process firmware commands */
-                
-                
                 // 1) select a channel
-                if (    buffer[0] == KEY_SIG_1 ||\
-                        buffer[0] == KEY_SIG_3 ||\
-                        buffer[0] == KEY_SIG_4 ||\
-                        buffer[0] == KEY_SIG_5 ||\
-                        buffer[0] == KEY_SIG_IN		){
+                if ( buffer[0] == KEY_DAC1 || buffer[0] == KEY_DAC2 || buffer[0] == KEY_DAC3 || buffer[0] == KEY_DAC4 || buffer[0] == KEY_SIG_IN) {
                     current_chan = buffer[0]-1-'0';
                     ChannelSel_Select( current_chan);
                     //show_channel_num();
-                }//END if ( buffer[0]
+                }
                 // 2) run sequence
                 if ( buffer[0] == KEY_RUN)
                     run_sequence();
@@ -455,10 +397,10 @@ void usbfs_interface(void)
                     
                     // write wave into flash memory:
                     wave_segment_ptr    = ((char *) signal_adc_1) + size_of_segment * package_number;
-                    memcpy(  wave_segment_ptr, (char *) &buffer[size_of_header], size_of_segment );                  
+                    strcpy(  wave_segment_ptr, (char *) &buffer[size_of_header] );                  
                     if( package_number == (number_of_packages-1) )
                     {
-                        FLASH_Write( (uint8*)signal_adc_1, FLASH_STORAGE[channel_number], number_of_samples-20);
+                        FLASH_Write( (uint8*)signal_adc_1, FLASH_STORAGE[channel_number], number_of_samples);
                     }
                 }
                 // 7) Use gpio P3[0] as trigger output
@@ -497,25 +439,6 @@ void usbfs_interface(void)
                     USBUART_PutData( (uint8 *)pseudoid , strlength);
                     
                 }
-                
-                // 11a) Shift waveforms in multiples of sampling time
-                if( buffer[0] == KEY_SHIFT_WAVEFORMS ){
-                    if( buffer[1] == '1' ){// Shift channel CH1
-                        flash_offset_ch1 = (buffer[2]<<8)+buffer[3];
-                    }else if( buffer[1] == '2' ){// Shift channel CH2
-                        flash_offset_ch2 = (buffer[2]<<8)+buffer[3];
-                    }else if( buffer[1] == '3' ){// Shift channel CH3
-                        flash_offset_ch2 = (buffer[2]<<8)+buffer[3];
-                    }else if( buffer[1] == '4' ){// Shift channel CH4
-                        flash_offset_ch2 = (buffer[2]<<8)+buffer[3];
-                    }else if( buffer[1] == 'A' ){// Shift all channels
-                        flash_offset_ch1  = (buffer[2]<<8)+buffer[3];
-                        flash_offset_ch2  = (buffer[2]<<8)+buffer[3];
-                        flash_offset_ch3  = (buffer[2]<<8)+buffer[3];
-                        flash_offset_ch4  = (buffer[2]<<8)+buffer[3];
-                    }
-                }//END if( buffer[0] == KEY_SHIFT_WAVEFORMS )
-                
                 
                 // 11) Get the binary data from the two uint16 ADC buffers
                 if ( buffer[0] == KEY_SEND_BYTE_DAT )
@@ -558,7 +481,7 @@ void uart_interface(void)
     uint number_of_samples;
     uint channel_number;
     char * wave_segment_ptr;
-    ready_to_start_sequence = TRUE; // used to avoid extern trigger from blocking the userinterface
+    nextRun = TRUE; // used to avoid extern trigger from blocking the userinterface
     // Control interface via UART for Putty or Matlab/Octave
     
     if( UART_1_GetRxBufferSize() > 0) {
@@ -572,12 +495,7 @@ void uart_interface(void)
     
         /* process firmware commands */
             // 1) select a channel
-            if (    puttyIn[0] == KEY_SIG_1 ||\
-                    puttyIn[0] == KEY_SIG_2 ||\
-                    puttyIn[0] == KEY_SIG_3 ||\
-                    puttyIn[0] == KEY_SIG_4 ||\
-                    puttyIn[0] == KEY_SIG_5 ||\
-                    puttyIn[0] == KEY_SIG_IN	) {
+            if (  puttyIn[0] == KEY_DAC1 ||  puttyIn[0] == KEY_DAC2 ||  puttyIn[0] == KEY_DAC3 ||  puttyIn[0] == KEY_DAC4 ||  puttyIn[0] == KEY_SIG_IN) {
                 current_chan = puttyIn[0]-1-'0';
                 ChannelSel_Select( current_chan );
                 //show_channel_num();
@@ -606,7 +524,7 @@ void uart_interface(void)
                 
                 // write wave into flash memory:
                 wave_segment_ptr    = ((char *) signal_adc_1) + size_of_segment * package_number;
-                memcpy(  wave_segment_ptr, (char *) &puttyIn[size_of_header], size_of_segment );
+                strcpy(  wave_segment_ptr, (char *) &puttyIn[size_of_header] );
                 if( package_number == (number_of_packages-1) )
                 {
                     FLASH_Write( (uint8*)signal_adc_1, FLASH_STORAGE[channel_number], number_of_samples);
@@ -717,8 +635,7 @@ void show_default_message(void)
     UART_1_PutCRLF(2);
     //sprintf(sms, "1) Press '%c' to run the sequence and show the results (ASCII table)", KEY_RUN_AND_SHOW);
     //    UART_1_PutString(sms); UART_1_PutCRLF(1);
-    sprintf(sms, "1) Press '%c', '%c', '%c', '%c' or '%c' for measuring DAC 1a, 1b, 2..4 or '%c' for measuring GPIO P0.7",\
-        KEY_SIG_1, KEY_SIG_2, KEY_SIG_3, KEY_SIG_4, KEY_SIG_5, KEY_SIG_IN );
+    sprintf(sms, "1) Press '%c', '%c', '%c' or '%c' for measuring DAC 1..4 or '%c' for measuring GPIO P0.7", KEY_DAC1, KEY_DAC2, KEY_DAC3, KEY_DAC4, KEY_SIG_IN );
         UART_1_PutString(sms); UART_1_PutCRLF(1);
     sprintf(sms, "2) Press '%c' to run the sequence", KEY_RUN);
         UART_1_PutString(sms); UART_1_PutCRLF(1);
@@ -791,16 +708,10 @@ void run_sequence(void)
     //UART_1_PutStringConst("Running sequence");
     internTrigger_Write(STOP_CLOCK);
     
-    // Reset trigger adjustments
-    ClockShift_1_Stop(); ClockShift_1_WriteRegValue(CLOCK_SHIFT_CH1); ClockShift_1_Start();
-    ClockShift_2_Stop(); ClockShift_2_WriteRegValue(CLOCK_SHIFT_CH2); ClockShift_2_Start();
-    ClockShift_3_Stop(); ClockShift_3_WriteRegValue(CLOCK_SHIFT_CH3); ClockShift_3_Start();
-    ClockShift_4_Stop(); ClockShift_4_WriteRegValue(CLOCK_SHIFT_CH4); ClockShift_4_Start();  
-    //channelsplitting (CH1 -> CH1a / CH1b)
-    ClockShift_1ab_Stop(); ClockShift_1ab_WriteRegValue(CLOCK_SHIFT_CH1ab); ClockShift_1ab_Start();
-    //channelsplitting (CH2 -> CH2a / CH2b)
-    ClockShift_2ab_Stop(); ClockShift_2ab_WriteRegValue(CLOCK_SHIFT_CH2ab); ClockShift_2ab_Start();
-    
+    ShiftReg_1_Stop(); ShiftReg_1_WriteRegValue(CLOCK_SHIFT_CH1); ShiftReg_1_Start();
+    ShiftReg_2_Stop(); ShiftReg_2_WriteRegValue(CLOCK_SHIFT_CH2); ShiftReg_2_Start();
+    ShiftReg_3_Stop(); ShiftReg_3_WriteRegValue(CLOCK_SHIFT_CH3); ShiftReg_3_Start();
+    ShiftReg_4_Stop(); ShiftReg_4_WriteRegValue(CLOCK_SHIFT_CH4); ShiftReg_4_Start();
 
     dma_dac_1_init();
     dma_dac_2_init();
@@ -815,43 +726,27 @@ void run_sequence(void)
     internTrigger_Write(START_CLOCK);
     
     count_of_runs++;
-}//END run_sequence()
+}
 
-void set_dac_range_1V(void) {
-    // Comment/uncomment for switching between 
-    // current DACs and voltage DACs
-    
-    IDAC8_1_SetRange( IDAC8_1_RANGE_32uA );
-    //IDAC8_1_SetRange( IDAC8_1_RANGE_1V );
-    
-    IDAC8_2_SetRange( IDAC8_2_RANGE_32uA );
-    //IDAC8_2_SetRange( IDAC8_1_RANGE_1V );
-    
-    IDAC8_3_SetRange( IDAC8_3_RANGE_32uA );
-    //IDAC8_3_SetRange( IDAC8_1_RANGE_1V );
-    
-    IDAC8_4_SetRange( IDAC8_4_RANGE_32uA );
-    //IDAC8_4_SetRange( IDAC8_1_RANGE_1V );  
-}//END set_dac_range_1V()
+void set_dac_range_1V(void) 
+{
+    IDAC8_1_SetRange( IDAC8_1_RANGE_1V );
+    IDAC8_2_SetRange( IDAC8_1_RANGE_1V );
+    IDAC8_3_SetRange( IDAC8_1_RANGE_1V );
+    IDAC8_4_SetRange( IDAC8_1_RANGE_1V );  
+    //UART_1_PutStringConst("1V DAC range");
+    //UART_1_PutCRLF(1);
+}
 
-
-void set_dac_range_4V(void){
-    // Comment/uncomment for switching between 
-    // current DACs and voltage DACs
-        
-    IDAC8_2_SetRange( IDAC8_2_RANGE_255uA );
-    //IDAC8_1_SetRange( IDAC8_1_RANGE_4V );
-    
-    IDAC8_2_SetRange( IDAC8_2_RANGE_255uA );
-    //IDAC8_2_SetRange( IDAC8_2_RANGE_4V );
-    
-    IDAC8_3_SetRange( IDAC8_3_RANGE_255uA );
-    //IDAC8_3_SetRange( IDAC8_3_RANGE_4V );
-    
-    IDAC8_4_SetRange( IDAC8_4_RANGE_255uA );
-    //IDAC8_4_SetRange( IDAC8_1_RANGE_4V ); 
-}//END set_dac_range_4V()
-
+void set_dac_range_4V(void)
+{
+    IDAC8_1_SetRange( IDAC8_1_RANGE_4V );
+    IDAC8_2_SetRange( IDAC8_1_RANGE_4V );
+    IDAC8_3_SetRange( IDAC8_1_RANGE_4V );
+    IDAC8_4_SetRange( IDAC8_1_RANGE_4V );    
+    //UART_1_PutStringConst("4V DAC range");
+    //UART_1_PutCRLF(1);
+}
     
 void dma_dac_1_init(void)
 {
@@ -867,9 +762,9 @@ void dma_dac_1_init(void)
     CyDmaTdSetConfiguration(DMA_DAC_1_TD[0], NSAMPLES_DAC, DMA_DAC_1_TD[1], CY_DMA_TD_INC_SRC_ADR);
     CyDmaTdSetConfiguration(DMA_DAC_1_TD[1], NSAMPLES_DAC, DMA_DAC_1_TD[2], CY_DMA_TD_INC_SRC_ADR);
     CyDmaTdSetConfiguration(DMA_DAC_1_TD[2], NSAMPLES_DAC, CY_DMA_DISABLE_TD, DMA_DAC_1__TD_TERMOUT_EN | CY_DMA_TD_INC_SRC_ADR);
-    CyDmaTdSetAddress(DMA_DAC_1_TD[0], LO16((uint32)(FLASH_CH1+flash_offset_ch1)), LO16((uint32)IDAC8_1_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_1_TD[1], LO16((uint32)(FLASH_CH1+flash_offset_ch1) + NSAMPLES_DAC), LO16((uint32)IDAC8_1_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_1_TD[2], LO16((uint32)(FLASH_CH1+flash_offset_ch1) + 2*NSAMPLES_DAC), LO16((uint32)IDAC8_1_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_1_TD[0], LO16((uint32)FLASH_CH1), LO16((uint32)IDAC8_1_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_1_TD[1], LO16((uint32)FLASH_CH1 + NSAMPLES_DAC), LO16((uint32)IDAC8_1_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_1_TD[2], LO16((uint32)FLASH_CH1 + 2*NSAMPLES_DAC), LO16((uint32)IDAC8_1_Data_PTR));
     CyDmaChSetInitialTd(DMA_DAC_1_Chan, DMA_DAC_1_TD[0]);
     CyDmaChEnable(DMA_DAC_1_Chan, 1);
 }
@@ -888,9 +783,9 @@ void dma_dac_2_init(void)
     CyDmaTdSetConfiguration(DMA_DAC_2_TD[0], NSAMPLES_DAC, DMA_DAC_2_TD[1], CY_DMA_TD_INC_SRC_ADR);
     CyDmaTdSetConfiguration(DMA_DAC_2_TD[1], NSAMPLES_DAC, DMA_DAC_2_TD[2], CY_DMA_TD_INC_SRC_ADR);
     CyDmaTdSetConfiguration(DMA_DAC_2_TD[2], NSAMPLES_DAC, CY_DMA_DISABLE_TD, DMA_DAC_2__TD_TERMOUT_EN | CY_DMA_TD_INC_SRC_ADR);
-    CyDmaTdSetAddress(DMA_DAC_2_TD[0], LO16((uint32)(FLASH_CH2+flash_offset_ch2)), LO16((uint32)IDAC8_2_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_2_TD[1], LO16((uint32)(FLASH_CH2+flash_offset_ch2) + NSAMPLES_DAC), LO16((uint32)IDAC8_2_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_2_TD[2], LO16((uint32)(FLASH_CH2+flash_offset_ch2) + 2*NSAMPLES_DAC), LO16((uint32)IDAC8_2_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_2_TD[0], LO16((uint32)FLASH_CH2), LO16((uint32)IDAC8_2_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_2_TD[1], LO16((uint32)FLASH_CH2 + NSAMPLES_DAC), LO16((uint32)IDAC8_2_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_2_TD[2], LO16((uint32)FLASH_CH2 + 2*NSAMPLES_DAC), LO16((uint32)IDAC8_2_Data_PTR));
     CyDmaChSetInitialTd(DMA_DAC_2_Chan, DMA_DAC_2_TD[0]);
     CyDmaChEnable(DMA_DAC_2_Chan, 1);
 }
@@ -909,9 +804,9 @@ void dma_dac_3_init(void)
     CyDmaTdSetConfiguration(DMA_DAC_3_TD[0], NSAMPLES_DAC, DMA_DAC_3_TD[1], CY_DMA_TD_INC_SRC_ADR);
     CyDmaTdSetConfiguration(DMA_DAC_3_TD[1], NSAMPLES_DAC, DMA_DAC_3_TD[2], CY_DMA_TD_INC_SRC_ADR);
     CyDmaTdSetConfiguration(DMA_DAC_3_TD[2], NSAMPLES_DAC, CY_DMA_DISABLE_TD, DMA_DAC_3__TD_TERMOUT_EN | CY_DMA_TD_INC_SRC_ADR);
-    CyDmaTdSetAddress(DMA_DAC_3_TD[0], LO16((uint32)(FLASH_CH3+flash_offset_ch3)), LO16((uint32)IDAC8_3_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_3_TD[1], LO16((uint32)(FLASH_CH3+flash_offset_ch3) + NSAMPLES_DAC), LO16((uint32)IDAC8_3_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_3_TD[2], LO16((uint32)(FLASH_CH3+flash_offset_ch3) + 2*NSAMPLES_DAC), LO16((uint32)IDAC8_3_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_3_TD[0], LO16((uint32)FLASH_CH3), LO16((uint32)IDAC8_3_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_3_TD[1], LO16((uint32)FLASH_CH3 + NSAMPLES_DAC), LO16((uint32)IDAC8_3_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_3_TD[2], LO16((uint32)FLASH_CH3 + 2*NSAMPLES_DAC), LO16((uint32)IDAC8_3_Data_PTR));
     CyDmaChSetInitialTd(DMA_DAC_3_Chan, DMA_DAC_3_TD[0]);
     CyDmaChEnable(DMA_DAC_3_Chan, 1);
 }
@@ -930,9 +825,9 @@ void dma_dac_4_init(void)
     CyDmaTdSetConfiguration(DMA_DAC_4_TD[0], NSAMPLES_DAC, DMA_DAC_4_TD[1], CY_DMA_TD_INC_SRC_ADR);
     CyDmaTdSetConfiguration(DMA_DAC_4_TD[1], NSAMPLES_DAC, DMA_DAC_4_TD[2], CY_DMA_TD_INC_SRC_ADR);
     CyDmaTdSetConfiguration(DMA_DAC_4_TD[2], NSAMPLES_DAC, CY_DMA_DISABLE_TD, DMA_DAC_4__TD_TERMOUT_EN | CY_DMA_TD_INC_SRC_ADR);
-    CyDmaTdSetAddress(DMA_DAC_4_TD[0], LO16((uint32)(FLASH_CH4+flash_offset_ch4)), LO16((uint32)IDAC8_4_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_4_TD[1], LO16((uint32)(FLASH_CH4+flash_offset_ch4) + NSAMPLES_DAC), LO16((uint32)IDAC8_4_Data_PTR));
-    CyDmaTdSetAddress(DMA_DAC_4_TD[2], LO16((uint32)(FLASH_CH4+flash_offset_ch4) + 2*NSAMPLES_DAC), LO16((uint32)IDAC8_4_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_4_TD[0], LO16((uint32)FLASH_CH4), LO16((uint32)IDAC8_4_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_4_TD[1], LO16((uint32)FLASH_CH4 + NSAMPLES_DAC), LO16((uint32)IDAC8_4_Data_PTR));
+    CyDmaTdSetAddress(DMA_DAC_4_TD[2], LO16((uint32)FLASH_CH4 + 2*NSAMPLES_DAC), LO16((uint32)IDAC8_4_Data_PTR));
     CyDmaChSetInitialTd(DMA_DAC_4_Chan, DMA_DAC_4_TD[0]);
     CyDmaChEnable(DMA_DAC_4_Chan, 1);
 }
@@ -1081,18 +976,26 @@ void dma_adc_2_init(void)
     CyDmaChEnable(DMA_ADC_2_Chan, 1);     
 }
 
-CY_ISR( isr_triggerIn ){
-    if( ready_to_start_sequence == TRUE ){
-        ready_to_start_sequence = FALSE; // avoid blocking Putty user interface
+CY_ISR( isr_triggerIn )
+{
+    if( nextRun == TRUE )
+    {
+        nextRun = FALSE; // avoid blocking Putty user interface 
         LED_Write( ~LED_Read()); // indicate trigger
         run_sequence(); 
         CyDelayUs(SEQU_DURATION_US); // Block CPU while sequence is running to avoid interference
     }
 }
 
-CY_ISR( isr_DAC_1_done ){
+CY_ISR( isr_DAC_1_done )
+{
 
-}//endCY_ISR DAC_1
+    //display_results();
+    
+    //UART_1_PutString("DAC_1 done!");
+    //UART_1_PutCRLF(1);
+    
+}
 
 CY_ISR( isr_DAC_2_done )
 {
