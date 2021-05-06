@@ -52,6 +52,8 @@ char  version[3] = "1.7";
 
 /* command set */
 // 1) select channel
+
+#define  KEY_SIG_0           '0'
 #define  KEY_SIG_1           '1'
 #define  KEY_SIG_2           '2'
 #define  KEY_SIG_3           '3'
