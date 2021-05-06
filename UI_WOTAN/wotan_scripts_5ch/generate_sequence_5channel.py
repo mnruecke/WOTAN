@@ -31,27 +31,10 @@
 """
 
 """ --- Required parameters ---- """ 
-# A) check device manager to see at which port number the board enumerates
-#serialPort = '\\\\.\\COM8' 
-# usbfs - lenovo thinkpad, Module M:
-#serialPort = '\\\\.\\COM17' 
-#serialPort = '\\\\.\\COM15'
-# usbfs - lenovo thinkpad, Module J:
-#serialPort = '\\\\.\\COM19' 
-# Port for BLE HC-05 ("next") - lenovo thinkpad: 
-#serialPort = '\\\\.\\COM10' 
-# usbfs - lifebook, Module J:
-#serialPort = '\\\\.\\COM11' 
 serialPort = '\\\\.\\COM12' 
 
 # B) baudrate
 baudrate = 1382400
-# C) uncomment line with the channel that is to be observed:
-#channel = b'1'  # show output of DAC 1
-#channel = b'2'  # show output of DAC 2
-#channel = b'3'  # show output of DAC 3
-#channel = b'4'  # show output of DAC 4
-channel = b'2'  # show signal voltage between GPIO P0.6 (-) and GPIO P0.7 (+)
 
 # D) uncomment the used interface
 #interface = "UART"
@@ -95,11 +78,11 @@ len_data = 32
     <param_list> = [<channel 1a>, <channel 1b>, <channel 2>, <channel 3>, <channel 4>]
 """
 # Main frequencies (Hz)
-f = frequency_scale*np.asarray([1000,1000,1000,1000,15000])
+f = frequency_scale*np.asarray([100,100,100,100,100])
 # Modulation frequencies (Hz)                    
 f_mod = frequency_scale*np.asarray([0,0,0,0,0])                      
 # Start phase for main frequencies (degree)
-phi = np.asarray([0+180, 0+180, 0, 0,0]) 
+phi = np.asarray([10, 20, 30, 40, 50]) 
 # Start phase for modulation frequencies (degree)
 phi_mod = np.asarray([90,90,90,90,90])   
 # Amplitudes at t=15 ms (start ramp goes from t=0...15 ms:

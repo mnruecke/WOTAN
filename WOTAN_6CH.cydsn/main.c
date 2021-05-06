@@ -35,7 +35,7 @@ generate sequence UART
 #include "project.h"// automatically generated header file
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
+#include <math.h>// => requires 'm' in: Project|Build Settings... -> ARM GCC ... -> Linker -> General -> Additional Libraries -> m
 
 char  version[3] = "1.7";  
 // Version 1.7: split CH1 and CH2 into CH1a/CH1b and CH2a/CH2b
@@ -53,13 +53,13 @@ char  version[3] = "1.7";
 /* command set */
 // 1) select channel
 
-#define  KEY_SIG_0           '0'
 #define  KEY_SIG_1           '1'
 #define  KEY_SIG_2           '2'
 #define  KEY_SIG_3           '3'
 #define  KEY_SIG_4           '4'
 #define  KEY_SIG_5           '5'
-#define  KEY_SIG_IN          '6'
+#define  KEY_SIG_6           '6'
+#define  KEY_SIG_IN          '7'
 // 2) run sequence
 #define  KEY_RUN             'r'
 // 3) reset firmware
@@ -299,6 +299,8 @@ void init_components(void){
     ClockShift_1ab_Start();  
     ClockShift_2ab_WriteRegValue(CLOCK_SHIFT_CH2ab);
     ClockShift_2ab_Start(); 
+    
+    GND_Shifter_Start();
     
     set_dac_range_4V();
     
