@@ -21,9 +21,6 @@
  * ========================================
  */
 
-/* TODO
-generate sequence UART
-*/
 
 // Using the internal oscillator "IMO":
 //
@@ -38,8 +35,8 @@ generate sequence UART
 #include <math.h>// => requires 'm' in: Project|Build Settings... -> ARM GCC ... -> Linker -> General -> Additional Libraries -> m
 
 char  version[3] = "1.7";  
-// Version 1.7: split CH1 and CH2 into CH1a/CH1b and CH2a/CH2b
-// by halfing the sampling rate
+// Version 1.7: allowing to split CH1 and CH2 into CH1a/CH1b and CH2a/CH2b
+// by halfing the sampling rate and using interleaved sampling patterns
 
 #define  TRUE               1
 #define  FALSE              0
@@ -59,7 +56,7 @@ char  version[3] = "1.7";
 #define  KEY_SIG_4           '4'
 #define  KEY_SIG_5           '5'
 #define  KEY_SIG_6           '6'
-#define  KEY_SIG_IN          '7'
+#define  KEY_SIG_MAIN        '7'
 // 2) run sequence
 #define  KEY_RUN             'r'
 // 3) reset firmware
@@ -300,7 +297,7 @@ void init_components(void){
     ClockShift_2ab_WriteRegValue(CLOCK_SHIFT_CH2ab);
     ClockShift_2ab_Start(); 
     
-    GND_Shifter_Start();
+    Baseline_Shifter_Start();
     
     set_dac_range_4V();
     
@@ -366,7 +363,7 @@ void init_components(void){
     // Components for user interface and debugging
     ChannelSel_Start();
         // use real input by default
-        ChannelSel_Select(current_chan=KEY_SIG_IN-1-'0');
+        ChannelSel_Select(current_chan=KEY_SIG_MAIN-1-'0');
     UART_1_Start();
     CompTrigger_Start();
         isrTrigger_StartEx( isr_triggerIn );
@@ -426,10 +423,12 @@ void usbfs_interface(void)
                 
                 // 1) select a channel
                 if (    buffer[0] == KEY_SIG_1 ||\
+                        buffer[0] == KEY_SIG_2 ||\
                         buffer[0] == KEY_SIG_3 ||\
                         buffer[0] == KEY_SIG_4 ||\
                         buffer[0] == KEY_SIG_5 ||\
-                        buffer[0] == KEY_SIG_IN		){
+                        buffer[0] == KEY_SIG_6 ||\
+                        buffer[0] == KEY_SIG_MAIN	){
                     current_chan = buffer[0]-1-'0';
                     ChannelSel_Select( current_chan);
                     //show_channel_num();
@@ -581,7 +580,8 @@ void uart_interface(void)
                     puttyIn[0] == KEY_SIG_3 ||\
                     puttyIn[0] == KEY_SIG_4 ||\
                     puttyIn[0] == KEY_SIG_5 ||\
-                    puttyIn[0] == KEY_SIG_IN	) {
+                    puttyIn[0] == KEY_SIG_6 ||\
+                    puttyIn[0] == KEY_SIG_MAIN	) {
                 current_chan = puttyIn[0]-1-'0';
                 ChannelSel_Select( current_chan );
                 //show_channel_num();
@@ -721,8 +721,8 @@ void show_default_message(void)
     UART_1_PutCRLF(2);
     //sprintf(sms, "1) Press '%c' to run the sequence and show the results (ASCII table)", KEY_RUN_AND_SHOW);
     //    UART_1_PutString(sms); UART_1_PutCRLF(1);
-    sprintf(sms, "1) Press '%c', '%c', '%c', '%c' or '%c' for measuring DAC 1a, 1b, 2..4 or '%c' for measuring GPIO P0.7",\
-        KEY_SIG_1, KEY_SIG_2, KEY_SIG_3, KEY_SIG_4, KEY_SIG_5, KEY_SIG_IN );
+    sprintf(sms, "1) Press '%c', '%c', '%c', '%c', '%c', '%c' or '%c' for changing the signal channel",\
+        KEY_SIG_1, KEY_SIG_2, KEY_SIG_3, KEY_SIG_4, KEY_SIG_5, KEY_SIG_6, KEY_SIG_MAIN );
         UART_1_PutString(sms); UART_1_PutCRLF(1);
     sprintf(sms, "2) Press '%c' to run the sequence", KEY_RUN);
         UART_1_PutString(sms); UART_1_PutCRLF(1);
