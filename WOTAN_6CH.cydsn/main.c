@@ -112,10 +112,10 @@ char  version[3] = "1.7";
 #define  N_TDS_DAC          3               // TD1: on ramp, TD2: sequence (each with length NSAMPLES_DAC)
 
 
-#define  FLASH_CH1          (const uint8 *)     0x0A000  // Flash addresses for storing the DAC wave forms
-#define  FLASH_CH2          (const uint8 *)     0x10000
-#define  FLASH_CH3          (const uint8 *)     0x20000
-#define  FLASH_CH4          (const uint8 *)     0x30000 
+#define  FLASH_CH1          (const uint8 *)     0x20000  // Flash addresses for storing the DAC wave forms
+#define  FLASH_CH2          (const uint8 *)     0x28000
+#define  FLASH_CH3          (const uint8 *)     0x30000
+#define  FLASH_CH4          (const uint8 *)     0x38000 
 const uint8 * FLASH_STORAGE[4] = {FLASH_CH1, FLASH_CH2, FLASH_CH3, FLASH_CH4};
 uint32 flash_offset_ch1 = 0; //Shifts wave form of CHX n sampling steps
 uint32 flash_offset_ch2 = 0; 
@@ -306,7 +306,9 @@ void init_components(void){
     ClockShift_2ab_WriteRegValue(CLOCK_SHIFT_CH2ab);
     ClockShift_2ab_Start(); 
     
-    Baseline_Shifter_Start();
+    // Buffer CH1, CH2
+    Buffer_1_Start();
+    Buffer_2_Start();
     
     set_dac_range_4V();
     
